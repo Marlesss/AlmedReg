@@ -42,12 +42,21 @@ def register():
             return render_template("register.html", title="Регистрация", form=form,
                                    message="Пароли не совпадают")
         session = db_session.create_session()
-        if session.query(User).filter(User.email == form.email.data).first():
+        # Проверка на корректность данных
+        # /Проверка на корректность данных
+        # Проверка на уникальность данных
+        if session.query(User).filter(User.telephone == form.telephone.data).first():
+            return render_template("register.html", title="Регистрация", form=form,
+                                   message="Этот номер телефона уже зарегистрирован!")
+        if form.email.data and session.query(User).filter(User.email == form.email.data).first():
             return render_template("register.html", title="Регистрация", form=form,
                                    message="Эта электронная почта уже зарегистрирована!")
+        # /Проверка на уникальность данных
         user = User(
-            email=form.email.data,
+            telephone=form.telephone.data
         )
+        if form.email.data:
+            user.email = form.email.data
         user.set_password(form.password.data)
         session.add(user)
         session.commit()
@@ -60,7 +69,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        user = session.query(User).filter(User.email == form.email.data).first()
+        user = session.query(User).filter(User.telephone == form.login.data).first()
+        if not user:
+            user = session.query(User).filter(User.email == form.login.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")

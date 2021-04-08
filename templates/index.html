@@ -2,4 +2,13 @@
 
 {% block content %}
 <h1>Пупы</h1>
+{% if current_user.is_authenticated %}
+<p>
+    Авторизован
+</p>
+{% else %}
+<p>
+    Не авторизован
+</p>
+{% endif %}
 {% endblock %}
