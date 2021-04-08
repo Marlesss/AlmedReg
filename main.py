@@ -55,6 +55,16 @@ def register():
     return render_template("register.html", title="Регистрация", form=form)
 
 
+@app.route("/edit_note", methods=["GET", "POST"])
+def edit_note():
+    return redirect("/")
+
+
+@app.route("/self_page", methods=["GET", "POST"])
+def self_page():
+    return render_template("self_page.html", title="Личный кабинет")
+
+
 @app.route("/login", methods=['GET', "POST"])
 def login():
     form = LoginForm()
