@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Админам хой!</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.text.label }} <br>
+        {{ form.text(class="form-control", type="text") }} <br>
+        {% for error in form.text.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    {{ form.submit(type="submit", class="btn btn-primary") }}
+    </p>
+    {{ message }}
+
+</form>
+<div>
+    {% for user in list_of_users %}
+    <p class="user_label">{{ user.telephone }} {{ user.email }}
+        {% if user.type_of_user == user.SUPERADMIN %} Супер-Админ
+        {% elif user.type_of_user == user.ADMIN %} Администратор
+        {% elif user.type_of_user == user.PATIENT %} Пациент
+        {% else %} Доктор
+        {% endif %}
+
+        {% if user.type_of_user > current_user.type_of_user %}
+        Изменить роль:
+        {% if current_user.type_of_user == current_user.SUPERADMIN %}
+        <a href="/redefine_role/admin/{{user.id}}" class="btn btn-light">Администратор</a>
+        {% endif %}
+        <a href="/redefine_role/patient/{{user.id}}" class="btn btn-light">Пациент</a>
+        <a href="/redefine_role/doctor/{{user.id}}" class="btn btn-light">Доктор</a>
+        {% endif %}
+    </p>
+    {% endfor %}
+</div>
+{% endblock %}

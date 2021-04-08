@@ -8,7 +8,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class User(SQLAlchemyBase, UserMixin):
-    ADMIN, PATIENT, DOCTOR = 0, 10, 20
+    SUPERADMIN, ADMIN, PATIENT, DOCTOR = -10, 0, 5, 10
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     telephone = sqlalchemy.Column(sqlalchemy.String, index=True, nullable=False)
@@ -25,4 +25,4 @@ class User(SQLAlchemyBase, UserMixin):
         return check_password_hash(self.hashed_password, password)
 
     def __repr__(self):
-        return f'User {self.id}: {self.email} {self.type_of_user}'
+        return f'User {self.id}: {self.telephone} {self.email} {self.type_of_user}'

@@ -6,6 +6,7 @@ from flask_restful import reqparse, abort, Api, Resource
 
 from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
+from Forms.search_form import SearchForm
 from data import db_session
 from data.users import User
 
@@ -25,12 +26,18 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/almed_database.db")
+    session = db_session.create_session()
+    admin = session.query(User).filter(User.email == "admin").first()
+    if not admin:
+        admin = User(telephone="admin", email="admin", type_of_user=User.SUPERADMIN)
+        admin.set_password("admin")
+        session.add(admin)
+        session.commit()
     app.run(port=8080, host="127.0.0.1")
 
 
 @app.route("/")
 def index():
-    session = db_session.create_session()
     return render_template("index.html")
 
 
@@ -85,6 +92,41 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route("/admin", methods=['GET', "POST"])
+def admin_interface():
+    if not (current_user.is_authenticated and
+            current_user.type_of_user in (User.ADMIN, User.SUPERADMIN)):
+        return redirect("/")
+    form = SearchForm()
+    session = db_session.create_session()
+    if form.validate_on_submit():
+        filter_text = f'%{form.text.data}%'
+        list_of_users = session.query(User).filter(User.telephone.like(filter_text) |
+                                                   User.email.like(filter_text)).all()[:10]
+        return render_template("admin.html", title="Панель администратора",
+                               list_of_users=list_of_users, form=form)
+    list_of_users = session.query(User).all()[:10]
+    return render_template("admin.html", title="Панель администратора",
+                           list_of_users=list_of_users, form=form)
+
+
+@app.route("/redefine_role/<string:role>/<int:id>")
+def redefine_role(role, id):
+    if not (current_user.is_authenticated and
+            current_user.type_of_user in (User.ADMIN, User.SUPERADMIN)):
+        return redirect("/")
+    try:
+        session = db_session.create_session()
+        user = session.query(User).get(id)
+        user.type_of_user = {"admin": User.ADMIN, "patient": User.PATIENT,
+                             "doctor": User.DOCTOR}[role]
+        session.merge(user)
+        session.commit()
+    except Exception:
+        pass
+    return redirect("/admin")
 
 
 if __name__ == "__main__":
