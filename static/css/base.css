@@ -1,3 +1,71 @@
-.user_label {
-    color: #ff0000;
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    position: relative;
+    z-index: 10;
+}
+
+.shadow {
+    margin: 0 auto;
+    max-width: 1280px;
+    max-height: 1000px;
+    box-shadow: -23px 0px 23px -9px rgb(234 234 234 / 75%),
+                 23px 0px 23px -9px rgb(234 234 234 / 75%);
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 1280px;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-width: 1000px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    background-color: white;
+}
+
+.site_body {
+    padding-bottom: 24px;
+    padding-top: 20px;
+}
+
+.clearfix {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+.site_title {
+    display: table;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 8px;
+}
+
+.row {
+    display: table-row;
+}
+
+.logo_container {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    width: 120px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.school_name_cont {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.empty_col {
+    display: table-cell;
+    width: 120px;
 }

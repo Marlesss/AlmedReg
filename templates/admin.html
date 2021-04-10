@@ -17,9 +17,9 @@
     {{ message }}
 
 </form>
-<div>
+<div style="overflow:scroll; height: 300px; width: 100%">
     {% for user in list_of_users %}
-    <p class="user_label">{{ user.telephone }} {{ user.email }}
+    <p class="btn btn-secondary" style="width: 100%">{{ user.telephone }} {{ user.email }}
         {% if user.type_of_user == user.SUPERADMIN %} Супер-Админ
         {% elif user.type_of_user == user.ADMIN %} Администратор
         {% elif user.type_of_user == user.PATIENT %} Пациент
