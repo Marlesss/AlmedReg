@@ -17,9 +17,8 @@
 <main role="main" class="container">
 
     <link href="static/css/lk_card.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <div class="card">
+    <div class="base"> /* мб переделать на нестатичную */
+    <div class="card" id="visitka">
        <div class="card-avatar">
           <svg viewBox="0 0 208 278">
               <g transform="matrix(0.1,0,0,-0.1,-31.2625,284.904)">
@@ -54,52 +53,29 @@
              </div>
           </div>
        </div>
+        <div class="info" id="info"><p>Приветики<br><br><br>qiwueoiu</p></div>
     </div>
 
+    <div class="notes">
+        <h2 align="center">Мои<br>Записи</h2>
+        <div align="center" style="overflow:scroll; height: 300px;">
+            {% for note in notes %}
+                {% if note["status_id"] == 1 %}
+                    <a href='/edit_note' class='btn btn-success' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                        }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                {% elif note["status_id"] == 3 %}
+                    <a href='/edit_note' class='btn btn-secondary' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                        }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                {% elif note["status_id"] == 4 %}
+                    <a href='/edit_note' class='btn btn-danger' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                        }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-    <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
-    Жмяк
-  </button>
-
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog modal-sm" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-        </div>
-        <div class="modal-body">
-          Любой текст
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-      </div>
     </div>
-  </div>
-
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-  <script>
-    $('#myModal').on('shown.bs.modal', function() {
-      $('#myInput').focus()
-    })
-
-  </script>
-<div style="overflow:scroll; height: 300px; width: 50%">
-    <a href='/edit_note' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-    <a href='/edit_note' target='_parent' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-    <a href='/edit_note' target='_parent' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-    <a href='/edit_note' target='_parent' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-    <a href='/edit_note' target='_parent' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-    <a href='/edit_note' target='_parent' class='btn btn-primary' style='width: 100%;'>Окулист<p align=left>06.08.2021</p></a><br>
-</div>
-
+        <footer></footer> /* тут контактная информация */
+    </div>
 </main>
 </body>
 {% endblock %}

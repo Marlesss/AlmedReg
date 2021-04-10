@@ -8,6 +8,7 @@ from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
 from data import db_session
 from data.users import User
+from for_tests import TALONS
 
 app = Flask(__name__)
 
@@ -62,7 +63,8 @@ def edit_note():
 
 @app.route("/self_page", methods=["GET", "POST"])
 def self_page():
-    return render_template("self_page.html", title="Личный кабинет")
+    notes = TALONS["data"]
+    return render_template("self_page.html", title="Личный кабинет", notes=notes)
 
 
 @app.route("/login", methods=['GET', "POST"])
