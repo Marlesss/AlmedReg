@@ -8,7 +8,7 @@ from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
 from data import db_session
 from data.users import User
-from for_tests import TALONS
+from for_tests import TALONS, PATIENT, DOCTOR
 
 app = Flask(__name__)
 
@@ -56,15 +56,23 @@ def register():
     return render_template("register.html", title="Регистрация", form=form)
 
 
-@app.route("/edit_note", methods=["GET", "POST"])
-def edit_note():
+@app.route("/check_note/<int:note_id>", methods=["GET", "POST"])
+def check_note(note_id):
+    notes = TALONS["data"]
+    for note in notes:
+        if note["id"] == note_id:
+            patient = PATIENT
+            doctor = DOCTOR
+            return render_template("check_note.html", note=note, patient=patient, doc=doctor)
+    print("Не нашлось талона")
     return redirect("/")
 
 
 @app.route("/self_page", methods=["GET", "POST"])
 def self_page():
-    notes = TALONS["data"]
-    return render_template("self_page.html", title="Личный кабинет", notes=notes)
+    patient = PATIENT
+    notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
+    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient)
 
 
 @app.route("/login", methods=['GET', "POST"])
