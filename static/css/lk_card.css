@@ -47,11 +47,16 @@ p.notetime { color: #222;
 
 }
 
+.visit{
+    width: 45%;
+    float: left;
+}
+
 
 .card {
-   width: 45%;
+
    height: var(--card-size);
-   float: left;
+
    min-width: 500px;
    border-radius: 0.75rem;
    box-shadow:  0 22px 70px 4px rgba(0,0,0,0.20), 0 0 0 1px rgba(0, 0, 0, 0.3);
@@ -74,7 +79,8 @@ p.notetime { color: #222;
 }
 
 .info{
-    position:relative;
+    margin-top: 10px;
+    text-align: center;
 }
 
 .card-details {

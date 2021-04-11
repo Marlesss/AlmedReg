@@ -60,7 +60,7 @@ def register():
 def check_note(note_id):
     notes = TALONS["data"]
     for note in notes:
-        if note["id"] == note_id:
+        if note["id"] == note_id and note["patient_id"] == current_user.med_card_id:
             patient = PATIENT
             doctor = DOCTOR
             return render_template("check_note.html", note=note, patient=patient, doc=doctor)
@@ -70,8 +70,15 @@ def check_note(note_id):
 
 @app.route("/self_page", methods=["GET", "POST"])
 def self_page():
+    # patient = archimed_response(current_user.med_card_id)
     patient = PATIENT
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
+    green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
+    grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
+    red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
+    notes = (sorted(green_notes, key=lambda note: note["datetime"])
+             + sorted(red_notes, key=lambda note: note["datetime"])
+             + sorted(grey_notes, key=lambda note: note["datetime"]))
     return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient)
 
 
