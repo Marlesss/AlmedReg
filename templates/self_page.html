@@ -30,6 +30,18 @@
     </div>
     <div class="notes">
         <h2 align="center">Мои<br>Записи</h2>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            {{ form.text.label }}
+            {{ form.text(class="form-control", type="text") }}
+            {{ form.search(type="submit", class="btn btn-primary") }}
+            <p>
+                {% for error in form.text.errors %}
+                    <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+            </p>
+            {{ message }}
+        </form>
         <div align="center" style="overflow:scroll;">
             {% for note in notes %}
                 {% if note["status_id"] == 1 %}
