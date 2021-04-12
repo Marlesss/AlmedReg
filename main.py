@@ -87,8 +87,6 @@ def self_page():
         text = form.text.data
         if not text.isalpha():
             date = text_without_letters(text)
-            #for note in notes:
-            #    print(date, text_without_letters(note["date"]) == date or date in note["date"].split(":"))
             notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
         elif text != "":
             notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
