@@ -12,8 +12,8 @@ payload = base64.b64encode(bytes(json.dumps({"iss": f"{api_id}",
                                              "exp": time.time() + 3600}), "utf-8"))
 JWT = jwt.encode({"some": str(payload)[2:-1]}, api_secret, algorithm="HS256")
 print(JWT)
-url = "https://newapi.archimed-soft.ru/api/v4/medcards?fields[]=id&fields[]=last_name&filters[0][field]=phone&filters[0][value]=1"
-header = {"Authorization": "Bearer" + JWT}
+url = "https://newapi.archimed-soft.ru/api/v4/accounts"
+header = {"Authorization": "Bearer " + JWT}
 response = requests.get(url, headers=header)
 print(response)
 # eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiAiMWUwMmVmYTYwNWY0NzQ1NzQ0ZDcyODFhZTFhZjI4YTAiLCAiZXhwIjogMTYxODI1Njk4NS4yODU4ODM0fQ==.c3acf544f4df7ec1bcdaec6c6b7d56b51b18d3f3fa009555307cf7029c5fedaa -> 1
