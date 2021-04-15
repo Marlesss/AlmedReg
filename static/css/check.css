@@ -47,9 +47,15 @@ p.notetime { color: #222;
     float: left;
 }
 
+.check{
+    min-width: 1280px;
+}
+
 .card {
 
    height: var(--card-size);
+   min-width: 600px;
+   max-width: 600px;
    border-radius: 0.75rem;
    box-shadow:  0 22px 70px 4px rgba(0,0,0,0.20), 0 0 0 1px rgba(0, 0, 0, 0.3);
 
@@ -68,6 +74,14 @@ p.notetime { color: #222;
       transform: scale(1.1);
       box-shadow:  0 32px 80px 14px rgba(0,0,0,0.36), 0 0 0 1px rgba(0, 0, 0, 0.3);
    }
+}
+
+.patient{
+    float: left;
+}
+
+.doctor{
+    float: right;
 }
 
 .info{

@@ -77,8 +77,12 @@ def check_note(note_id):
     return redirect("/")
 
 
-@app.route("/self_page", methods=["GET", "POST"])
-def self_page():
+@app.route("/self_page/<int:self_id>", methods=["GET", "POST"])
+def self_page(self_id):
+    if not current_user.is_authenticated:
+        return redirect("/")
+    if current_user.id != self_id:
+        return redirect("/")
     # patient = archimed_response(current_user.med_card_id)
     patient = PATIENT
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
