@@ -8,13 +8,6 @@
    --card-size: 300px;
 }
 
-.base{
-    align: center;
-    position: fixed;
-    width: 1080px;
-    size: fixed;
-}
-
 .datetime{
     text-align: center;
     padding-top: 20px;
@@ -34,17 +27,27 @@ p.notetime { color: #222;
   }
 
 .notes{
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
     width: 50%;
-    height: 100%;
-    float: left;
-    padding-left: 5%;
     min-width: 500px;
-
 }
 
 .visit{
-    width: 45%;
-    float: left;
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
+    width: 50%;
+}
+
+.lk{
+    display: table;
+    width: 100%;
+}
+
+.row {
+    display: table-row;
 }
 
 .card {

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, make_response, session, abort
 from flask import jsonify
+from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import datetime
 from flask_restful import reqparse, abort, Api, Resource
@@ -13,6 +14,7 @@ from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
 
 app = Flask(__name__)
+Bootstrap(app)
 
 app.config["SECRET_KEY"] = 'secret_key'
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)

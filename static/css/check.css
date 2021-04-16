@@ -1,18 +1,10 @@
 
 :root {
-   --background: white;
 
    --primary: #ff1ead;
    --secondary: #1effc3;
 
    --card-size: 300px;
-}
-
-.base{
-    align: center;
-    position: fixed;
-    width: 1080px;
-    size: fixed;
 }
 
 .datetime{
@@ -33,28 +25,10 @@ p.notetime { color: #222;
     margin: 0 0 14px;
   }
 
-.notes{
-    width: 50%;
-    height: 100%;
-    float: left;
-    padding-left: 5%;
-    min-width: 500px;
-
-}
-
-.visit{
-    width: 45%;
-    float: left;
-}
-
-.check{
-    min-width: 1280px;
-}
 
 .card {
 
    height: var(--card-size);
-   min-width: 600px;
    max-width: 600px;
    border-radius: 0.75rem;
    box-shadow:  0 22px 70px 4px rgba(0,0,0,0.20), 0 0 0 1px rgba(0, 0, 0, 0.3);
@@ -74,14 +48,6 @@ p.notetime { color: #222;
       transform: scale(1.1);
       box-shadow:  0 32px 80px 14px rgba(0,0,0,0.36), 0 0 0 1px rgba(0, 0, 0, 0.3);
    }
-}
-
-.patient{
-    float: left;
-}
-
-.doctor{
-    float: right;
 }
 
 .info{
@@ -151,4 +117,27 @@ svg {
       font-size: 0.75rem;
       line-height: 1.25rem;
    }
+}
+
+.check{
+    display: table;
+    width: 100%;
+}
+
+.row {
+    display: table-row;
+}
+
+.patient {
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
+    width: 50%;
+}
+
+.doctor {
+    display: table-cell;
+    vertical-align: top;
+    text-align: center;
+    width: 50%;
 }
