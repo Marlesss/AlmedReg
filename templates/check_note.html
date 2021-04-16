@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 align="center">{{ note["docs"][0]["type"] }}</h1>
+<link href="../static/css/check.css" rel="stylesheet">
+{% if note["status_id"] == 1 %}
+    <div class="band" style="background: green;"><p align="center">Ждём вас на прием</p></div>
+{% elif note["status_id"] == 3 %}
+    <div class="band" style="background: grey;"><p align="center">Приём прошёл</p></div>
+{% elif note["status_id"] == 4 %}
+    <div class="band" style="background: red;"><p align="center">Приём отменён</p></div>
+{% endif %}
+    <div class="check">
+        <div class="patient">
+            <div class="card">
+               <div class="card-avatar">
+                  <img src="../static/img/patient.png">
+               </div>
+               <div class="card-details">
+                  <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{ patient["middle_name"] }}</div>
+                  <div class="occupation">Пациент</div>
+                  <div class="card-about">
+                     <div class="item">
+                        <span class="value">Email:</span>
+                        <span class="label">{{ patient["email"] }}</span>
+                     </div>
+                  </div>
+                   <div class="card-about">
+                     <div class="item">
+                        <span class="value">Birthday:</span>
+                        <span class="label">{{ patient["birthdate"] }}</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="datetime"><p class="notetime">Дата приёма: {{ note["date"] }}<br>Время приёма: {{ ":".join(note["begintime"].split(":")[:2]) }}</p></div>
+        </div>
+        <div class="doctor">
+            <div class="card">
+               <div class="card-avatar">
+                      <img src="../static/img/doc.png">
+               </div>
+               <div class="card-details">
+                  <div class="name">{{ doc["last_name"] }} {{ doc["first_name"] }} {{ doc["middle_name"] }}</div>
+                  <div class="occupation">Доктор</div>
+                  <div class="card-about">
+                     <div class="item">
+                        <span class="value">Специализация:</span>
+                        <span class="label">{{ doc["type"] }}</span>
+                     </div>
+                  </div>
+                   <div class="card-about">
+                     <div class="item">
+                        <span class="value">Ученая степень:</span>
+                        <span class="label">{{ doc["scientific_degree"] }}</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            {% if note["status_id"] == 1 %}
+                <div class="cancel"><a class="btn btn-danger" href="/">Отменить запись на приём</a></div>
+            {% else %}
+                <div class="cancel"><a class="btn btn-secondary">Отменить запись на приём</a></div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
