@@ -1,0 +1,7 @@
+{% extends "appointment.html" %}
+
+{% block step_content %}
+    {% for build in buildings %}
+        <a href="/appointment/2/{{ loop.index - 1 }}">{{ build }}</a><br>
+    {% endfor %}
+{% endblock %}

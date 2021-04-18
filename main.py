@@ -13,6 +13,10 @@ from data import db_session
 from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
 
+
+REGISTER_STEPS = []
+
+
 app = Flask(__name__)
 Bootstrap(app)
 
@@ -81,6 +85,59 @@ def register():
         session.commit()
         return redirect("/login")
     return render_template("register.html", title="Регистрация", form=form)
+
+
+@app.route("/appointment/1", methods=["GET", "POST"])
+def get_building():
+    global REGISTER_STEPS
+    REGISTER_STEPS = [["Корпус1", "Корпус2"]]
+    print(REGISTER_STEPS)
+    return render_template("appointment_step_1.html", buildings=REGISTER_STEPS[0], step=1)
+
+
+@app.route("/appointment/2/<int:chosen_building>")
+def get_spec(chosen_building):
+    global REGISTER_STEPS
+    if REGISTER_STEPS[0].__class__.__name__ == "list":
+        REGISTER_STEPS = [REGISTER_STEPS[0][chosen_building], ["узи", "окулист", "терапевт"]]
+    else:
+        REGISTER_STEPS = [REGISTER_STEPS[0], ["узи", "окулист", "терапевт"]]
+    print(REGISTER_STEPS)
+    return render_template("appointment_step_2.html", specializations=REGISTER_STEPS[1],
+                           chosen_building=chosen_building, step=2)
+
+
+@app.route("/appointment/3/<int:chosen_building>/<int:chosen_specialization>")
+def get_doc(chosen_building, chosen_specialization):
+    global REGISTER_STEPS
+    if REGISTER_STEPS[1].__class__.__name__ == "list":
+        REGISTER_STEPS = [REGISTER_STEPS[0], REGISTER_STEPS[1][chosen_specialization], ["врач1", "врач2", "врач3"]]
+    else:
+        REGISTER_STEPS = REGISTER_STEPS[:2] + [["врач1", "врач2", "врач3"]]
+    print(REGISTER_STEPS)
+    return render_template("appointment_step_3.html", doctors=REGISTER_STEPS[2], chosen_building=chosen_building,
+                           chosen_specialization=chosen_specialization, step=3)
+
+
+@app.route("/appointment/4/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>")
+def get_interval(chosen_building, chosen_specialization, chosen_doc):
+    global REGISTER_STEPS
+    if REGISTER_STEPS[2].__class__.__name__ == "list":
+        REGISTER_STEPS = REGISTER_STEPS[:2] + [REGISTER_STEPS[2][chosen_doc], ["10:10", "11:11", "12:12"]]
+    else:
+        REGISTER_STEPS = REGISTER_STEPS[:3] + [["10:10", "11:11", "12:12"]]
+    print(REGISTER_STEPS)
+    return render_template("appointment_step_4.html", intervals=REGISTER_STEPS[3], chosen_building=chosen_building,
+                           chosen_specialization=chosen_specialization, chosen_doc=chosen_doc, step=4)
+
+
+@app.route("/appointment/finish/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>/<int:chosen_interval>")
+def finish_appointment(chosen_building, chosen_specialization, chosen_doc, chosen_interval):
+    global REGISTER_STEPS
+    REGISTER_STEPS = REGISTER_STEPS[:3] + [REGISTER_STEPS[3][chosen_interval]]
+    return render_template("appointment_finish.html", chosen_building=REGISTER_STEPS[0],
+                           chosen_specialization=REGISTER_STEPS[1], chosen_doc=REGISTER_STEPS[2],
+                           chosen_interval=REGISTER_STEPS[3])
 
 
 @app.route("/check_note/<int:note_id>", methods=["GET", "POST"])

@@ -1,0 +1,9 @@
+{% extends "appointment.html" %}
+
+{% block step_content %}
+<link rel="stylesheet" href="../../../../static/css/steps.css">
+<script src="../../../../static/js/modernizr.js"></script>
+    {% for interval in intervals %}
+        <a href="/appointment/finish/{{ chosen_building }}/{{ chosen_specialization }}/{{ chosen_doc }}/{{ loop.index - 1 }}">{{ interval }}</a><br>
+    {% endfor %}
+{% endblock %}
