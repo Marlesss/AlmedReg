@@ -1,8 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, request, make_response, session, abort
-from flask import jsonify
+from flask import session as note_session
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import datetime
+import requests
+import pprint
+import jwt as pyjwt
+import time
 from flask_restful import reqparse, abort, Api, Resource
 
 from Forms.register_form import RegisterForm
@@ -18,6 +22,8 @@ REGISTER_STEPS = []
 
 
 app = Flask(__name__)
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=180)
+session["step"] = 1
 Bootstrap(app)
 
 app.config["SECRET_KEY"] = 'secret_key'
@@ -30,6 +36,24 @@ login_manager.init_app(app)
 def load_user(user_id):
     session = db_session.create_session()
     return session.query(User).get(user_id)
+
+
+def get_jwt():
+    api_id = '1e02efa605f4745744d7281ae1af28a0'
+    api_secret = "f2a08627c8a550488f309bce75089a39"
+    JWT = pyjwt.encode({"iss": api_id, "exp": time.time() + 3600}, api_secret, algorithm="HS256")
+    return JWT
+
+
+def get_response(method, id="", params=""):
+    jwt = get_jwt()
+    url = f"https://newapi.archimed-soft.ru/api/v4/{method}/"
+    header = {"Authorization": "Bearer " + jwt}
+    if params != "":
+        params = "&".join(params)
+    response = requests.get(url + id + "?" + params, headers=header).json()
+    pprint.pprint(response)
+    return response
 
 
 def text_without_letters(text):
@@ -87,21 +111,38 @@ def register():
     return render_template("register.html", title="Регистрация", form=form)
 
 
+@app.route("/appointment", methods=["GET", "POST"])
+def get_appointment():
+    if session["step"] == 1:
+        session["steps"] = []
+        return render_template("")
+    elif session["step"] == 2:
+        session["steps"] = session["steps"][:1]
+    elif session["step"] == 3:
+        session["steps"] = session["steps"][:2]
+    return render_template("base.html")
+
+
+@app.route("/change_step/<int:step>", methods=["GET", "POST"])
+def change_step(step):
+    session["step"] = step
+    redirect("/appointment")
+"""
 @app.route("/appointment/1", methods=["GET", "POST"])
 def get_building():
     global REGISTER_STEPS
-    REGISTER_STEPS = [["Корпус1", "Корпус2"]]
-    print(REGISTER_STEPS)
+    REGISTER_STEPS = [get_response("buildings", params=["fields[]=name", "fields[]=address", "fields[]=id"])["data"]]
     return render_template("appointment_step_1.html", buildings=REGISTER_STEPS[0], step=1)
 
 
 @app.route("/appointment/2/<int:chosen_building>")
 def get_spec(chosen_building):
     global REGISTER_STEPS
+    spec = get_response("specializations", params=["fields[]=name", "fields[]=id"])["data"]
     if REGISTER_STEPS[0].__class__.__name__ == "list":
-        REGISTER_STEPS = [REGISTER_STEPS[0][chosen_building], ["узи", "окулист", "терапевт"]]
+        REGISTER_STEPS = [REGISTER_STEPS[0][chosen_building], spec]
     else:
-        REGISTER_STEPS = [REGISTER_STEPS[0], ["узи", "окулист", "терапевт"]]
+        REGISTER_STEPS = [REGISTER_STEPS[0], spec]
     print(REGISTER_STEPS)
     return render_template("appointment_step_2.html", specializations=REGISTER_STEPS[1],
                            chosen_building=chosen_building, step=2)
@@ -138,7 +179,7 @@ def finish_appointment(chosen_building, chosen_specialization, chosen_doc, chose
     return render_template("appointment_finish.html", chosen_building=REGISTER_STEPS[0],
                            chosen_specialization=REGISTER_STEPS[1], chosen_doc=REGISTER_STEPS[2],
                            chosen_interval=REGISTER_STEPS[3])
-
+"""
 
 @app.route("/check_note/<int:note_id>", methods=["GET", "POST"])
 def check_note(note_id):
@@ -158,16 +199,20 @@ def self_page(self_id):
         return redirect("/")
     if current_user.id != self_id:
         return redirect("/")
-    # patient = archimed_response(current_user.med_card_id)
-    patient = PATIENT
+    params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
+              "fields[]=birthdate", "fields[]=email"]
+    patient = get_response("medcards", str(current_user.med_card_id), params)
+    pprint.pprint(patient)
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
     form = NoteForm()
     if form.validate_on_submit():
         text = form.text.data
-        if not text.isalpha():
+        if text == "":
+            pass
+        elif not text.isalpha():
             date = text_without_letters(text)
             notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
-        elif text != "":
+        else:
             notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
     green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
     grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
