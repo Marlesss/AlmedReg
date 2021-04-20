@@ -3,11 +3,7 @@ from flask import session as note_session
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import datetime
-import requests
 import pprint
-import jwt as pyjwt
-import time
-from flask_restful import reqparse, abort, Api, Resource
 
 from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
@@ -16,7 +12,7 @@ from Forms.note_form import NoteForm
 from data import db_session
 from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
-
+from Archimed import get_response, get_jwt
 
 REGISTER_STEPS = []
 
@@ -36,24 +32,6 @@ login_manager.init_app(app)
 def load_user(user_id):
     session = db_session.create_session()
     return session.query(User).get(user_id)
-
-
-def get_jwt():
-    api_id = '1e02efa605f4745744d7281ae1af28a0'
-    api_secret = "f2a08627c8a550488f309bce75089a39"
-    JWT = pyjwt.encode({"iss": api_id, "exp": time.time() + 3600}, api_secret, algorithm="HS256")
-    return JWT
-
-
-def get_response(method, id="", params=""):
-    jwt = get_jwt()
-    url = f"https://newapi.archimed-soft.ru/api/v4/{method}/"
-    header = {"Authorization": "Bearer " + jwt}
-    if params != "":
-        params = "&".join(params)
-    response = requests.get(url + id + "?" + params, headers=header).json()
-    pprint.pprint(response)
-    return response
 
 
 def text_without_letters(text):
@@ -115,7 +93,8 @@ def register():
 def get_appointment():
     if session["step"] == 1:
         session["steps"] = []
-        return render_template("")
+#        buildings = get_response("specializations")
+#        return render_template("appointment_step_1.html", buildings=buildings["data"])
     elif session["step"] == 2:
         session["steps"] = session["steps"][:1]
     elif session["step"] == 3:
