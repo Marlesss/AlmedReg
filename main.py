@@ -13,9 +13,7 @@ from data import db_session
 from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
 
-
 REGISTER_STEPS = []
-
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -75,6 +73,9 @@ def register():
             return render_template("register.html", title="Регистрация", form=form,
                                    message="Эта электронная почта уже зарегистрирована!")
         # /Проверка на уникальность данных
+        # Создаём мед. карту
+        # /Создаём мед. карту
+        print(form.first_name.data, form.middle_name.data, form.surname.data)
         user = User(
             telephone=form.telephone.data
         )
@@ -111,11 +112,13 @@ def get_spec(chosen_building):
 def get_doc(chosen_building, chosen_specialization):
     global REGISTER_STEPS
     if REGISTER_STEPS[1].__class__.__name__ == "list":
-        REGISTER_STEPS = [REGISTER_STEPS[0], REGISTER_STEPS[1][chosen_specialization], ["врач1", "врач2", "врач3"]]
+        REGISTER_STEPS = [REGISTER_STEPS[0], REGISTER_STEPS[1][chosen_specialization],
+                          ["врач1", "врач2", "врач3"]]
     else:
         REGISTER_STEPS = REGISTER_STEPS[:2] + [["врач1", "врач2", "врач3"]]
     print(REGISTER_STEPS)
-    return render_template("appointment_step_3.html", doctors=REGISTER_STEPS[2], chosen_building=chosen_building,
+    return render_template("appointment_step_3.html", doctors=REGISTER_STEPS[2],
+                           chosen_building=chosen_building,
                            chosen_specialization=chosen_specialization, step=3)
 
 
@@ -123,15 +126,19 @@ def get_doc(chosen_building, chosen_specialization):
 def get_interval(chosen_building, chosen_specialization, chosen_doc):
     global REGISTER_STEPS
     if REGISTER_STEPS[2].__class__.__name__ == "list":
-        REGISTER_STEPS = REGISTER_STEPS[:2] + [REGISTER_STEPS[2][chosen_doc], ["10:10", "11:11", "12:12"]]
+        REGISTER_STEPS = REGISTER_STEPS[:2] + [REGISTER_STEPS[2][chosen_doc],
+                                               ["10:10", "11:11", "12:12"]]
     else:
         REGISTER_STEPS = REGISTER_STEPS[:3] + [["10:10", "11:11", "12:12"]]
     print(REGISTER_STEPS)
-    return render_template("appointment_step_4.html", intervals=REGISTER_STEPS[3], chosen_building=chosen_building,
-                           chosen_specialization=chosen_specialization, chosen_doc=chosen_doc, step=4)
+    return render_template("appointment_step_4.html", intervals=REGISTER_STEPS[3],
+                           chosen_building=chosen_building,
+                           chosen_specialization=chosen_specialization, chosen_doc=chosen_doc,
+                           step=4)
 
 
-@app.route("/appointment/finish/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>/<int:chosen_interval>")
+@app.route(
+    "/appointment/finish/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>/<int:chosen_interval>")
 def finish_appointment(chosen_building, chosen_specialization, chosen_doc, chosen_interval):
     global REGISTER_STEPS
     REGISTER_STEPS = REGISTER_STEPS[:3] + [REGISTER_STEPS[3][chosen_interval]]
@@ -152,12 +159,11 @@ def check_note(note_id):
     return redirect("/")
 
 
-@app.route("/self_page/<int:self_id>", methods=["GET", "POST"])
-def self_page(self_id):
+@app.route("/self_page", methods=["GET", "POST"])
+def self_page():
     if not current_user.is_authenticated:
         return redirect("/")
-    if current_user.id != self_id:
-        return redirect("/")
+    self_id = current_user.id
     # patient = archimed_response(current_user.med_card_id)
     patient = PATIENT
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
@@ -166,16 +172,20 @@ def self_page(self_id):
         text = form.text.data
         if not text.isalpha():
             date = text_without_letters(text)
-            notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
+            notes = list(filter(
+                lambda note: text_without_letters(note["date"]) == date or date in note[
+                    "date"].split("."), notes))
         elif text != "":
-            notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+            notes = list(
+                filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
     green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
     grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
     red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
     notes = (sorted(green_notes, key=lambda note: note["datetime"])
              + sorted(red_notes, key=lambda note: note["datetime"])
              + sorted(grey_notes, key=lambda note: note["datetime"]))
-    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form)
+    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient,
+                           form=form)
 
 
 @app.route("/login", methods=['GET', "POST"])
