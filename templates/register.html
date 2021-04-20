@@ -5,6 +5,33 @@
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
+        {{ form.surname.label }} <br>
+        {{ form.surname(class="form-control", type="name") }} <br>
+        {% for error in form.surname.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.first_name.label }} <br>
+        {{ form.first_name(class="form-control", type="name") }} <br>
+        {% for error in form.first_name.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.middle_name.label }} <br>
+        {{ form.middle_name(class="form-control", type="name") }} <br>
+        {% for error in form.middle_name.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+    </p>
+    <p>
         {{ form.telephone.label }} <br>
         {{ form.telephone(class="form-control", type="telephone") }} <br>
         {% for error in form.telephone.errors %}

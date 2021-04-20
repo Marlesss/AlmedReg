@@ -16,7 +16,7 @@
             <div class="site_title">
                 <div class="row">
                     <div class="logo_container">
-                        <a href="/"><img src="/static/images/almed.png" alt=""></a>
+                        <a href="/"><img src="/static/images/almed.png" alt="" width="320px"></a>
                     </div>
                     <div class="school_name_cont">
                         <p class="school_description">Общество с ограниченной ответственностью
@@ -24,6 +24,17 @@
                         <p class="school_name">Медицинский центр Алмед </p>
                     </div>
                     <div class="empty_col">
+                        {% if current_user.is_authenticated %}
+                        <div class="row">
+                            <a class="btn btn-light col" href="/self_page">Личный кабинет</a>
+                            &nbsp;&nbsp;&nbsp;
+                            <a class="btn btn-danger col" href="/logout">Выйти</a>
+                        </div>
+                        {% else %}
+                        <div>
+                            Не авторизован
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

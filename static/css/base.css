@@ -69,3 +69,7 @@ body {
     display: table-cell;
     width: 120px;
 }
+
+.col {
+    display: table-cell;
+}

@@ -16,7 +16,6 @@ from Archimed import get_response, get_jwt
 
 REGISTER_STEPS = []
 
-
 app = Flask(__name__)
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=180)
 session["step"] = 1
@@ -172,16 +171,13 @@ def check_note(note_id):
     return redirect("/")
 
 
-@app.route("/self_page/<int:self_id>", methods=["GET", "POST"])
-def self_page(self_id):
+@app.route("/self_page", methods=["GET", "POST"])
+def self_page():
     if not current_user.is_authenticated:
         return redirect("/")
-    if current_user.id != self_id:
-        return redirect("/")
-    params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
-              "fields[]=birthdate", "fields[]=email"]
-    patient = get_response("medcards", str(current_user.med_card_id), params)
-    pprint.pprint(patient)
+    self_id = current_user.id
+    # patient = archimed_response(current_user.med_card_id)
+    patient = PATIENT
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
     form = NoteForm()
     if form.validate_on_submit():
@@ -199,7 +195,8 @@ def self_page(self_id):
     notes = (sorted(green_notes, key=lambda note: note["datetime"])
              + sorted(red_notes, key=lambda note: note["datetime"])
              + sorted(grey_notes, key=lambda note: note["datetime"]))
-    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form)
+    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient,
+                           form=form)
 
 
 @app.route("/login", methods=['GET', "POST"])
