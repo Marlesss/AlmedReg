@@ -1,0 +1,38 @@
+.date{
+    display: table-cell;
+    vertical-align: center;
+    text-align: center;
+    width: 50%;
+}
+
+.doc_name{
+    display: table-cell;
+    text-align: left;
+    width: 50%;
+}
+
+.header{
+    display: table-cell;
+    text-align: center;
+    font-style: bold;
+}
+
+#doc{
+    width: 50%;
+}
+
+.header_day{
+    display: table-cell;
+    text-align: center;
+    font-style: bold;
+    width: 7%;
+}
+
+.doctor{
+    display: table;
+    width: 100%;
+}
+
+.row {
+    display: table-row;
+}

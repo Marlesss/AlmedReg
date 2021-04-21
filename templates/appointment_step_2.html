@@ -1,9 +1,27 @@
 {% extends "appointment.html" %}
 
 {% block step_content %}
-<link rel="stylesheet" href="../../static/css/steps.css">
-<script src="../../static/js/modernizr.js"></script>
-    {% for spec in specializations %}
-        <a href="/appointment/3/{{ chosen_building }}/{{ loop.index - 1 }}">{{ spec }}</a><br>
-    {% endfor %}
+<link href="/static/css/doctor.css" rel="stylesheet">
+    <section>
+        <div class="doctor">
+            <div class="row">
+                <div class="header" id="doc">Врач</div>
+                {% for i in range(7) %}
+                    {% if i == 0 %}
+                        <div class="header_day">Сегодня<br>{{ week[i][1] }}</div>
+                    {% else %}
+                        <div class="header_day">{{ week[i][0] }}<br>{{ week[i][1] }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% for doc in doctors %}
+            <div class="row">
+                <div class="doc_name">
+                    {{ doc["name"] }}<br>{{ doc["primary_spec"] }}
+                    <a href="/change_step/2/{{ loop.index - 1 }}">1</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
 {% endblock %}

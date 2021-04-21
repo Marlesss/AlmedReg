@@ -368,3 +368,54 @@ DOCTOR = {
     "scientific_degree_id": 2,
     "scientific_degree": "д.м.н"
 }
+
+INTERVALS = {
+    "doctors": [
+        {
+            "id": 8,
+            "name": "Сергеев Иван Петрович",
+            "primary_spec": "Хирург",
+            "primary_spec_id": "34",
+            "specs": [
+                {
+                    "id": "32",
+                    "name": "Аллерголог"
+                },
+                {
+                    "id": "34",
+                    "name": "Хирург"
+                }
+            ],
+            "schedules": [
+                {
+                    "id": "2005",
+                    "build_id": "1",
+                    "build_name": "Корпус 1",
+                    "room": "Кабинет № 2",
+                    "address": "ул. Космонавтов, 41",
+                    "kind": "0",
+                    "date": "18.08.2020",
+                    "start": "08:00",
+                    "end": "09:00",
+                    "intervals": [
+                        {
+                            "start": "08:00",
+                            "end": "08:20",
+                            "free": True
+                        },
+                        {
+                            "start": "08:20",
+                            "end": "08:40",
+                            "free": True
+                        },
+                        {
+                            "start": "08:40",
+                            "end": "09:00",
+                            "free": False
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

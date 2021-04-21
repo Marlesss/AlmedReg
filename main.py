@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, make_respo
 from flask import session as note_session
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import datetime
+import datetime as dt
 import pprint
 
 from Forms.register_form import RegisterForm
@@ -11,19 +11,19 @@ from Forms.search_form import SearchForm
 from Forms.note_form import NoteForm
 from data import db_session
 from data.users import User
-from for_tests import TALONS, PATIENT, DOCTOR
-from Archimed import get_response, get_jwt
+from for_tests import TALONS, PATIENT, DOCTOR, INTERVALS
+from Archimed import get_response, TODAY, NEXT_WEEK, NEXT_MONTH
 
-REGISTER_STEPS = []
-
+WEEK = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+MONTHS = ["Янв.", "Фев.", "Марта", "Апр.", "Мая",
+          "Июня", "Июля", "Авг.", "Сент.", "Окт.", "Нояб.", "Дек."]
 
 app = Flask(__name__)
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=180)
-session["step"] = 1
+app.config['PERMANENT_SESSION_LIFETIME'] = dt.timedelta(minutes=180)
 Bootstrap(app)
 
 app.config["SECRET_KEY"] = 'secret_key'
-app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=365)
+app.config["PERMANENT_SESSION_LIFETIME"] = dt.timedelta(days=365)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -91,74 +91,72 @@ def register():
 
 @app.route("/appointment", methods=["GET", "POST"])
 def get_appointment():
-    if session["step"] == 1:
-        session["steps"] = []
-#        buildings = get_response("specializations")
-#        return render_template("appointment_step_1.html", buildings=buildings["data"])
-    elif session["step"] == 2:
-        session["steps"] = session["steps"][:1]
-    elif session["step"] == 3:
-        session["steps"] = session["steps"][:2]
-    return render_template("base.html")
+    try:
+        if session.get("step", 0) == 0:
+            session["step"] = 0
+            spec = get_response("specializations")
+            session["steps"] = [spec["data"]]
+            return render_template("appointment_step_1.html", specializations=spec["data"], step=session["step"])
+        elif session["step"] == 1:
+            intervals = get_response("intervals", params=[f"date_from={TODAY}", f"date_to={NEXT_MONTH}"])["doctors"]
+            intervals = INTERVALS["doctors"]
+            doctors = list(filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
+            day_today, month_today, year_today = map(int, session["interval"][0].split("."))
+            day_week, month_week, year_week = map(int, session["interval"][1].split("."))
+            date_today = dt.date(day=day_today, month=month_today, year=year_today)
+            date_week = dt.date(day=day_week, month=month_week, year=year_week)
+            week = []
+            for i in range(1, 8):
+                day = dt.date(int(year_today), int(month_today), int(day_today)) + dt.timedelta(days=i)
+                week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month]])
+            for doc in doctors:
+                for i in range(len(doc["schedules"])):
+                    day, month, year = map(int, doc["schedules"][i]["date"].split("."))
+                    date = dt.date(year=year, day=day, month=month)
+                    if date >= date_today and date_week >= date:
+                        doc["schedules"] = doc["schedules"][i:]
+                        break
+            session["steps"] = session["steps"][:1] + [doctors]
+            return render_template("appointment_step_2.html", doctors=doctors, step=session["step"], week=week)
+        elif session["step"] == 2:
+            intervals = session["steps"][1]["schedules"]
+            session["steps"] = session["steps"][:2] + [intervals]
+            return render_template("appointment_step_3.html", intervals=intervals, step=session["step"])
+        else:
+            return render_template("appointment_finish.html", appointment=session["steps"], step=session["step"])
+    except Exception as e:
+        return render_template("appointment_step_1.html")
 
 
-@app.route("/change_step/<int:step>", methods=["GET", "POST"])
-def change_step(step):
+@app.route("/change_interval/<int:change_type>")
+def change_interval(change_type):
+    if change_type == 1:
+        day = str(session["interval"][1].split("."))
+        new_date = dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) + dt.timedelta(days=7)
+        session["interval"] = [session["interval"][1], new_date]
+    else:
+        day = str(session["interval"][0].split("."))
+        old_date = dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)
+        session["interval"] = [old_date, session["interval"][0]]
+    return redirect("/appointment")
+
+
+@app.route("/change_step/<string:step>/<string:ind>", methods=["GET", "POST"])
+def change_step(step, ind):
+    ind = int(ind)
+    session["interval"] = [TODAY, NEXT_WEEK]
+    if step != "finish":
+        step = int(step)
+    else:
+        session["steps"][session["step"]] = session["steps"][session["step"]][ind]
+        appointment = session["steps"]
+        return render_template("appointment_finish.html", appointment=appointment)
+    print(session["step"], session["steps"], ind, sep="\n")
+    if ind >= 0:
+        session["steps"][session["step"]] = session["steps"][session["step"]][ind]
     session["step"] = step
-    redirect("/appointment")
-"""
-@app.route("/appointment/1", methods=["GET", "POST"])
-def get_building():
-    global REGISTER_STEPS
-    REGISTER_STEPS = [get_response("buildings", params=["fields[]=name", "fields[]=address", "fields[]=id"])["data"]]
-    return render_template("appointment_step_1.html", buildings=REGISTER_STEPS[0], step=1)
+    return redirect("/appointment")
 
-
-@app.route("/appointment/2/<int:chosen_building>")
-def get_spec(chosen_building):
-    global REGISTER_STEPS
-    spec = get_response("specializations", params=["fields[]=name", "fields[]=id"])["data"]
-    if REGISTER_STEPS[0].__class__.__name__ == "list":
-        REGISTER_STEPS = [REGISTER_STEPS[0][chosen_building], spec]
-    else:
-        REGISTER_STEPS = [REGISTER_STEPS[0], spec]
-    print(REGISTER_STEPS)
-    return render_template("appointment_step_2.html", specializations=REGISTER_STEPS[1],
-                           chosen_building=chosen_building, step=2)
-
-
-@app.route("/appointment/3/<int:chosen_building>/<int:chosen_specialization>")
-def get_doc(chosen_building, chosen_specialization):
-    global REGISTER_STEPS
-    if REGISTER_STEPS[1].__class__.__name__ == "list":
-        REGISTER_STEPS = [REGISTER_STEPS[0], REGISTER_STEPS[1][chosen_specialization], ["врач1", "врач2", "врач3"]]
-    else:
-        REGISTER_STEPS = REGISTER_STEPS[:2] + [["врач1", "врач2", "врач3"]]
-    print(REGISTER_STEPS)
-    return render_template("appointment_step_3.html", doctors=REGISTER_STEPS[2], chosen_building=chosen_building,
-                           chosen_specialization=chosen_specialization, step=3)
-
-
-@app.route("/appointment/4/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>")
-def get_interval(chosen_building, chosen_specialization, chosen_doc):
-    global REGISTER_STEPS
-    if REGISTER_STEPS[2].__class__.__name__ == "list":
-        REGISTER_STEPS = REGISTER_STEPS[:2] + [REGISTER_STEPS[2][chosen_doc], ["10:10", "11:11", "12:12"]]
-    else:
-        REGISTER_STEPS = REGISTER_STEPS[:3] + [["10:10", "11:11", "12:12"]]
-    print(REGISTER_STEPS)
-    return render_template("appointment_step_4.html", intervals=REGISTER_STEPS[3], chosen_building=chosen_building,
-                           chosen_specialization=chosen_specialization, chosen_doc=chosen_doc, step=4)
-
-
-@app.route("/appointment/finish/<int:chosen_building>/<int:chosen_specialization>/<int:chosen_doc>/<int:chosen_interval>")
-def finish_appointment(chosen_building, chosen_specialization, chosen_doc, chosen_interval):
-    global REGISTER_STEPS
-    REGISTER_STEPS = REGISTER_STEPS[:3] + [REGISTER_STEPS[3][chosen_interval]]
-    return render_template("appointment_finish.html", chosen_building=REGISTER_STEPS[0],
-                           chosen_specialization=REGISTER_STEPS[1], chosen_doc=REGISTER_STEPS[2],
-                           chosen_interval=REGISTER_STEPS[3])
-"""
 
 @app.route("/check_note/<int:note_id>", methods=["GET", "POST"])
 def check_note(note_id):
@@ -170,6 +168,13 @@ def check_note(note_id):
             return render_template("check_note.html", note=note, patient=patient, doc=doctor)
     print("Не нашлось талона")
     return redirect("/")
+
+
+@app.route("/clear_session")
+def clear_session():
+    session["step"] = 0
+    session["steps"] = []
+    return redirect(f"/self_page/{current_user.id}")
 
 
 @app.route("/self_page/<int:self_id>", methods=["GET", "POST"])

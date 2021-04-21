@@ -1,7 +1,9 @@
 {% extends "appointment.html" %}
 
 {% block step_content %}
-    {% for build in buildings %}
-        <a href="/appointment/2/{{ loop.index - 1 }}">{{ build }}</a><br>
+    {% for spec in specializations %}
+    <section style="height: 50px; padding: 15px; margin: 0;">
+        <a href="/change_step/1/{{ loop.index - 1 }}">{{ spec["name"] }}</a><br>
+    </section>
     {% endfor %}
 {% endblock %}
