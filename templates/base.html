@@ -23,16 +23,28 @@
                             «Эльче»</p>
                         <p class="school_name">Медицинский центр Алмед </p>
                     </div>
-                    <div class="empty_col">
+                    <div class="control_col">
                         {% if current_user.is_authenticated %}
+                        {% if current_user.type_of_user <= current_user.ADMIN %}
                         <div class="row">
-                            <a class="btn btn-light col" href="/self_page">Личный кабинет</a>
-                            &nbsp;&nbsp;&nbsp;
+                            <a class="btn btn-light col" href="/admin">
+                                Панель&nbsp;администратора
+                            </a>
+                            <div class="empty_col"></div>
                             <a class="btn btn-danger col" href="/logout">Выйти</a>
                         </div>
                         {% else %}
+                        <div class="row">
+                            <a class="btn btn-light col" href="/self_page">Личный&nbsp;кабинет</a>
+                            <div class="empty_col"></div>
+                            <a class="btn btn-danger col" href="/logout">Выйти</a>
+                        </div>
+                        {% endif %}
+                        {% else %}
                         <div>
-                            Не авторизован
+                            <a class="btn btn-success col" href="/login">Войти</a>
+                            <div class="empty_col"></div>
+                            <a class="btn btn-light col" href="/register">Зарегистрироваться</a>
                         </div>
                         {% endif %}
                     </div>

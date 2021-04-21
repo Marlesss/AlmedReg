@@ -9,6 +9,7 @@ from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
 from Forms.search_form import SearchForm
 from Forms.note_form import NoteForm
+from Forms.change_password_form import ChangePasswordForm
 from data import db_session
 from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
@@ -18,7 +19,6 @@ REGISTER_STEPS = []
 
 app = Flask(__name__)
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=180)
-session["step"] = 1
 Bootstrap(app)
 
 app.config["SECRET_KEY"] = 'secret_key'
@@ -50,6 +50,7 @@ def main():
         admin.set_password("admin")
         session.add(admin)
         session.commit()
+
     app.run(port=8080, host="127.0.0.1")
 
 
@@ -60,6 +61,8 @@ def index():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if current_user.is_authenticated:
+        return redirect("/")
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -76,6 +79,9 @@ def register():
             return render_template("register.html", title="Регистрация", form=form,
                                    message="Эта электронная почта уже зарегистрирована!")
         # /Проверка на уникальность данных
+        # Создаём мед. карту
+        print(form.first_name.data, form.middle_name.data, form.surname.data)
+        # /Создаём мед. карту
         user = User(
             telephone=form.telephone.data
         )
@@ -92,8 +98,8 @@ def register():
 def get_appointment():
     if session["step"] == 1:
         session["steps"] = []
-#        buildings = get_response("specializations")
-#        return render_template("appointment_step_1.html", buildings=buildings["data"])
+    #        buildings = get_response("specializations")
+    #        return render_template("appointment_step_1.html", buildings=buildings["data"])
     elif session["step"] == 2:
         session["steps"] = session["steps"][:1]
     elif session["step"] == 3:
@@ -105,6 +111,8 @@ def get_appointment():
 def change_step(step):
     session["step"] = step
     redirect("/appointment")
+
+
 """
 @app.route("/appointment/1", methods=["GET", "POST"])
 def get_building():
@@ -159,6 +167,7 @@ def finish_appointment(chosen_building, chosen_specialization, chosen_doc, chose
                            chosen_interval=REGISTER_STEPS[3])
 """
 
+
 @app.route("/check_note/<int:note_id>", methods=["GET", "POST"])
 def check_note(note_id):
     notes = TALONS["data"]
@@ -186,9 +195,12 @@ def self_page():
             pass
         elif not text.isalpha():
             date = text_without_letters(text)
-            notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
-        else:
-            notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+            notes = list(filter(
+                lambda note: text_without_letters(note["date"]) == date or date in note[
+                    "date"].split("."), notes))
+        elif text != "":
+            notes = list(
+                filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
     green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
     grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
     red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
@@ -201,6 +213,8 @@ def self_page():
 
 @app.route("/login", methods=['GET', "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect("/")
     form = LoginForm()
     if form.validate_on_submit():
         session = db_session.create_session()
@@ -235,7 +249,7 @@ def admin_interface():
                                                    User.email.like(filter_text)).all()[:10]
         return render_template("admin.html", title="Панель администратора",
                                list_of_users=list_of_users, form=form)
-    list_of_users = session.query(User).all()[:10]
+    list_of_users = session.query(User).all()
     return render_template("admin.html", title="Панель администратора",
                            list_of_users=list_of_users, form=form)
 
@@ -255,6 +269,26 @@ def redefine_role(role, id):
     except Exception:
         pass
     return redirect("/admin")
+
+
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if form.password.data != form.password_again.data:
+            return render_template("change_password.html", title="Изменить пароль", form=form,
+                                   message="Пароли не совпадают")
+        if current_user.check_password(form.password.data):
+            return render_template("change_password.html", title="Изменить пароль", form=form,
+                                   message="Пароль не должен совпадать с предыдущим")
+        session = db_session.create_session()
+        user = session.query(User).get(current_user.id)
+        user.set_password(form.password.data)
+        session.merge(user)
+        session.commit()
+        return redirect("/")
+    return render_template("change_password.html", title="Изменить пароль", form=form)
 
 
 if __name__ == "__main__":
