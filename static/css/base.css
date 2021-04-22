@@ -34,7 +34,7 @@ body {
     padding-top: 20px;
 }
 
-.clearfix {
+.clear_fix {
     content: " ";
     display: table;
     clear: both;

@@ -33,6 +33,11 @@ def load_user(user_id):
     return session.query(User).get(user_id)
 
 
+def unformated_phone(formated_phone):
+    return (formated_phone[:2] + formated_phone[3:6] + formated_phone[7:10] +
+            formated_phone[11:13] + formated_phone[14:16])
+
+
 def text_without_letters(text):
     date = ""
     for lit in text:
@@ -46,7 +51,7 @@ def main():
     session = db_session.create_session()
     admin = session.query(User).filter(User.email == "admin").first()
     if not admin:
-        admin = User(telephone="admin", email="admin", type_of_user=User.SUPERADMIN)
+        admin = User(telephone="admin", email="admin@admin", type_of_user=User.SUPERADMIN)
         admin.set_password("admin")
         session.add(admin)
         session.commit()
@@ -65,14 +70,18 @@ def register():
         return redirect("/")
     form = RegisterForm()
     if form.validate_on_submit():
-        if form.password.data != form.password_again.data:
-            return render_template("register.html", title="Регистрация", form=form,
-                                   message="Пароли не совпадают")
+        phone = unformated_phone(form.telephone.data)
         session = db_session.create_session()
         # Проверка на корректность данных
+        if form.password.data != form.password_again.data:
+            return render_template("register.html", title="Регистрация", form=form,
+                                   message="Пароли не совпадают!")
+        if "_" in phone:
+            return render_template("register.html", title="Регистрация", form=form,
+                                   message="Введите номер телефона!")
         # /Проверка на корректность данных
         # Проверка на уникальность данных
-        if session.query(User).filter(User.telephone == form.telephone.data).first():
+        if session.query(User).filter(User.telephone == phone).first():
             return render_template("register.html", title="Регистрация", form=form,
                                    message="Этот номер телефона уже зарегистрирован!")
         if form.email.data and session.query(User).filter(User.email == form.email.data).first():
@@ -83,7 +92,7 @@ def register():
         print(form.first_name.data, form.middle_name.data, form.surname.data)
         # /Создаём мед. карту
         user = User(
-            telephone=form.telephone.data
+            telephone=phone
         )
         if form.email.data:
             user.email = form.email.data
@@ -217,10 +226,18 @@ def login():
         return redirect("/")
     form = LoginForm()
     if form.validate_on_submit():
+        phone = unformated_phone(form.telephone.data)
+        email = form.email.data
+        if "_" in phone and not email:
+            return render_template("login.html", title="Авторизация",
+                                   message="Введите номер телефона или адрес электронной почты",
+                                   form=form)
+
         session = db_session.create_session()
-        user = session.query(User).filter(User.telephone == form.login.data).first()
-        if not user:
-            user = session.query(User).filter(User.email == form.login.data).first()
+        if phone:
+            user = session.query(User).filter(User.telephone == phone).first()
+        else:
+            user = session.query(User).filter(User.email == email).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
