@@ -47,8 +47,9 @@ body {
     padding-bottom: 8px;
 }
 
-.table {
-    display: table;
+.table-info {
+display: table;
+border-bottom-color: transparent;
 }
 
 .table-scroll {
@@ -59,13 +60,13 @@ body {
 
 .row {
     display: table-row;
+    border-spacing: 5px;
 }
 
 .row-info {
-    width: 100%
-    height: 60px;
-    border-spacing: 5px;
-    line-height: 60px;
+    width: 100%;
+    line-height: 1.7;
+    height: 40px;
 }
 
 .logo_container {

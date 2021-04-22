@@ -2,67 +2,88 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-    <link href="../static/css/lk_card.css" rel="stylesheet">
-    <div class="lk">
+<link href="../static/css/lk_card.css" rel="stylesheet">
+<div class="lk">
     <div class="row">
         <div class="visit">
-        <h2 align="center">Моя<br>Карта</h2>
-        <div class="card">
-           <div class="card-avatar">
-              <img src="../static/img/patient.png">
-           </div>
-           <div class="card-details">
-              <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{ patient["middle_name"] }}</div>
-              <div class="occupation">Пациент</div>
-              <div class="card-about">
-                 <div class="item">
-                    <span class="value">Email:</span>
-                    <span class="label">{{ patient["email"] }}</span>
-                 </div>
-              </div>
-               <div class="card-about">
-                 <div class="item">
-                    <span class="value">Birthday:</span>
-                    <span class="label">{{ patient["birthdate"] }}</span>
-                 </div>
-              </div>
-           </div>
-        </div>
-            <div class="info"><a class="btn btn-success" href="/appointment/1">Записаться на приём</a></div>
+            <h2 align="center">Моя<br>Карта</h2>
+            <div class="card">
+                <div class="card-avatar">
+                    <img src="../static/img/patient.png">
+                </div>
+                <div class="card-details">
+                    <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{
+                        patient["middle_name"] }}
+                    </div>
+                    <div class="occupation">Пациент</div>
+                    <div class="card-about">
+                        <div class="item">
+                            <span class="value">Email:</span>
+                            <span class="label">{{ patient["email"] }}</span>
+                        </div>
+                    </div>
+                    <div class="card-about">
+                        <div class="item">
+                            <span class="value">Birthday:</span>
+                            <span class="label">{{ patient["birthdate"] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info"><a class="btn btn-success" href="/appointment/1">Записаться на
+                приём</a></div>
         </div>
         <div class="notes">
             <h2 align="center">Мои<br>Записи</h2>
             <form class="form-inline" method="post">
                 {{ form.hidden_tag() }}
                 <div class="form-group">
-                {{ form.text.label }}
+                    {{ form.text.label }}
                 </div>
-                <div class="form-group">
-                {{ form.text(class="form-control") }}
-                {{ form.search(class="btn btn-primary") }}
+                <div class="form-group row">
+                    <div class="col">{{ form.text(class="form-control") }}</div>
+                    <div class="col">{{ form.search(class="btn btn-primary") }}</div>
                 </div>
                 <p>
                     {% for error in form.text.errors %}
-                        <p class="alert alert-danger" role="alert">{{ error }}</p>
-                    {% endfor %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
                 </p>
                 {{ message }}
             </form>
-            <div align="center" style="overflow:scroll;">
+            <div align="center" style="overflow:auto;height:280px;">
                 {% for note in notes %}
-                    {% if note["status_id"] == 1 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-success' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% elif note["status_id"] == 3 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-secondary' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% elif note["status_id"] == 4 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-danger' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% endif %}
+                {% if note["status_id"] == 1 %}
+                <a href='/check_note/{{ note["id"] }}' class='btn btn-success' style='width: 100%;'>
+                    <div>{{ note["docs"][0]["type"] }}
+                    </div>
+                    <br>
+                    <div style="float: left">{{ note["date"] }}</div>
+                    <div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div>
+                </a><br>
+                {% elif note["status_id"] == 3 %}
+                <a href='/check_note/{{ note["id"] }}' class='btn btn-secondary'
+                   style='width: 100%;'>
+                    <div>{{ note["docs"][0]["type"]
+                        }}
+                    </div>
+                    <br>
+                    <div style="float: left">{{ note["date"] }}</div>
+                    <div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div>
+                </a><br>
+                {% elif note["status_id"] == 4 %}
+                <a href='/check_note/{{ note["id"] }}' class='btn btn-danger' style='width: 100%;'>
+                    <div>{{ note["docs"][0]["type"]
+                        }}
+                    </div>
+                    <br>
+                    <div style="float: left">{{ note["date"] }}</div>
+                    <div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div>
+                </a><br>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
     </div>
-    </div>
+</div>
 {% endblock %}

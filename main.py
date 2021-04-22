@@ -244,9 +244,12 @@ def admin_interface():
     form = SearchForm()
     session = db_session.create_session()
     if form.validate_on_submit():
-        filter_text = f'%{form.text.data}%'
-        list_of_users = session.query(User).filter(User.telephone.like(filter_text) |
-                                                   User.email.like(filter_text)).all()[:10]
+        list_of_users = session.query(User)
+        if form.text.data:
+            filter_text = f'%{form.text.data}%'
+            list_of_users = list_of_users.filter(User.telephone.like(filter_text) |
+                                                 User.email.like(filter_text))
+        list_of_users = list_of_users.all()
         return render_template("admin.html", title="Панель администратора",
                                list_of_users=list_of_users, form=form)
     list_of_users = session.query(User).all()
@@ -289,6 +292,22 @@ def change_password():
         session.commit()
         return redirect("/")
     return render_template("change_password.html", title="Изменить пароль", form=form)
+
+
+@app.route("/delete/<int:id>")
+def delete_user(id):
+    if not (current_user.is_authenticated and
+            current_user.type_of_user in (User.ADMIN, User.SUPERADMIN)):
+        return redirect("/")
+    try:
+        session = db_session.create_session()
+        user = session.query(User).get(id)
+        if user and user.type_of_user > current_user.type_of_user:
+            session.delete(user)
+            session.commit()
+    except Exception:
+        pass
+    return redirect("/admin")
 
 
 if __name__ == "__main__":

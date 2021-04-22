@@ -27,3 +27,6 @@ def get_response(method, id="", params=""):
         params = "&".join(params)
     response = requests.get(url + id + "?" + params, headers=header).json()
     return response
+
+
+# print(get_response("intervals", params=["date_from=01.08.2020", "date_to=31.12.2021"]))

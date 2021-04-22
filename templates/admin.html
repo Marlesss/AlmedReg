@@ -22,36 +22,47 @@
 
 </form>
 <div class="table-scroll">
-    {% for user in list_of_users %}
-    <div class="row row-info btn btn-secondary">
-        <div class="col col-info">{{ user.telephone }}</div>
-        <div class="col col-info">{{ user.email }}</div>
-        <div class="col col-info">
-            {% if user.type_of_user == user.SUPERADMIN %} Супер&#8209;Админ
-            {% elif user.type_of_user == user.ADMIN %} Администратор
-            {% elif user.type_of_user == user.PATIENT %} Пациент
-            {% else %} Доктор
+    <div class="table-info">
+        <div class="row row-info btn btn-secondary">
+            <div class="col col-info">Телефон</div>
+            <div class="col col-info">Электронная почта</div>
+            <div class="col col-info">Роль</div>
+            <div class="col col-info">Изменить роль</div>
+            <div class="col col-info">Удалить</div>
+        </div>
+        {% for user in list_of_users %}
+        <div class="row row-info btn btn-secondary">
+            <div class="col col-info">{{ user.telephone }}</div>
+            <div class="col col-info">{{ user.email }}</div>
+            <div class="col col-info">
+                {% if user.type_of_user == user.SUPERADMIN %} Супер&#8209;Админ
+                {% elif user.type_of_user == user.ADMIN %} Администратор
+                {% elif user.type_of_user == user.PATIENT %} Пациент
+                {% else %} Доктор
+                {% endif %}
+            </div>
+            {% if user.type_of_user > current_user.type_of_user %}
+            <div class="col col-info">
+                <div class="row row-info">
+                    {% if current_user.type_of_user == current_user.SUPERADMIN %}
+                    <a href="/redefine_role/admin/{{user.id}}" class="col col-info btn btn-light">
+                        Администратор</a>
+                    {% endif %}
+                    <a href="/redefine_role/patient/{{user.id}}" class="col col-info btn btn-light">
+                        Пациент</a>
+                    <a href="/redefine_role/doctor/{{user.id}}" class="col col-info btn btn-light">
+                        Доктор</a>
+                </div>
+            </div>
+            <div class="col col-info">
+                <a href="/delete/{{user.id}}" class="col col-info btn btn-danger">Удалить</a>
+            </div>
+            {% else %}
+            <div class="col"></div>
+            <div class="col"></div>
             {% endif %}
         </div>
-        {% if user.type_of_user > current_user.type_of_user %}
-        <div class="col col-info">Изменить&nbsp;роль:</div>
-        <div class="col col-info">
-            <div class="row row-info">
-                {% if current_user.type_of_user == current_user.SUPERADMIN %}
-                <a href="/redefine_role/admin/{{user.id}}" class="col col-info btn btn-light">
-                    Администратор</a>
-                {% endif %}
-                <a href="/redefine_role/patient/{{user.id}}" class="col col-info btn btn-light">
-                    Пациент</a>
-                <a href="/redefine_role/doctor/{{user.id}}" class="col col-info btn btn-light">
-                    Доктор</a>
-            </div>
-        </div>
-        {% else %}
-        <div class="col"></div>
-        <div class="col"></div>
-        {% endif %}
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
