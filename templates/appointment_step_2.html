@@ -3,9 +3,12 @@
 {% block step_content %}
 <link href="/static/css/doctor.css" rel="stylesheet">
     <section>
+        <a href="/change_interval/2" class="btn btn-primary"><</a>
+        <a href="/change_interval/1" class="btn btn-primary">></a>
+        <a href="/change_interval/3" class="btn btn-primary">x</a>
         <div class="doctor">
             <div class="row">
-                <div class="header" id="doc">Врач</div>
+                <div class="header_doc">Врач</div>
                 {% for i in range(7) %}
                     {% if i == 0 %}
                         <div class="header_day">Сегодня<br>{{ week[i][1] }}</div>
@@ -20,6 +23,30 @@
                     {{ doc["name"] }}<br>{{ doc["primary_spec"] }}
                     <a href="/change_step/2/{{ loop.index - 1 }}">1</a>
                 </div>
+                {% for i in range(7) %}
+                <div class="days">
+                    {% if doc["schedules"][i] != []%}
+                    {% if i == 0 %}
+                        {% if int(doc["schedules"][i]["start"].split(":")[0]) * 60
+                            + int(doc["schedules"][i]["start"].split(":")[1]) <= time and
+                            time <= int(doc["schedules"][i]["end"].split(":")[0]) * 60
+                            + int(doc["schedules"][i]["end"].split(":")[1]) and doc["schedules"][i]["free"]%}
+                            <a class="btn btn-success"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                        {% else %}
+                            <a class="btn btn-secondary"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                        {%endif%}
+                    {% else %}
+                        {% if doc["schedules"][i]["free"]%}
+                            <a class="btn btn-success"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                        {% else %}
+                            <a class="btn btn-secondary"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                        {%endif%}
+                    {% endif %}
+                    {% else %}
+                        <a class="btn btn-secondary"><p class="fs-3">Нет приёма</p></a>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
             {% endfor %}
         </div>

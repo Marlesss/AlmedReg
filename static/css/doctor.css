@@ -17,15 +17,33 @@
     font-style: bold;
 }
 
-#doc{
-    width: 50%;
+
+.days{
+    display: table-cell;
+    text-align: center;
+    min-width: 100px;
+    max-width: 100px;
+    padding: 0;
+    margin: 0;
+}
+
+.btn{
+    width: 100%;
+    height: 70px;
+}
+
+.header_doc{
+    display: table-cell;
+    text-align: center;
+    font-style: bold;
 }
 
 .header_day{
     display: table-cell;
     text-align: center;
     font-style: bold;
-    width: 7%;
+    min-width: 100px;
+    max-width: 100px;
 }
 
 .doctor{

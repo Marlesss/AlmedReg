@@ -394,9 +394,9 @@ INTERVALS = {
                     "room": "Кабинет № 2",
                     "address": "ул. Космонавтов, 41",
                     "kind": "0",
-                    "date": "18.08.2020",
+                    "date": "26.04.2021",
                     "start": "08:00",
-                    "end": "09:00",
+                    "end": "23:00",
                     "intervals": [
                         {
                             "start": "08:00",
@@ -406,7 +406,7 @@ INTERVALS = {
                         {
                             "start": "08:20",
                             "end": "08:40",
-                            "free": True
+                            "free": False
                         },
                         {
                             "start": "08:40",

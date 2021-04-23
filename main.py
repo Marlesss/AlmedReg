@@ -99,25 +99,48 @@ def get_appointment():
             return render_template("appointment_step_1.html", specializations=spec["data"], step=session["step"])
         elif session["step"] == 1:
             intervals = get_response("intervals", params=[f"date_from={TODAY}", f"date_to={NEXT_MONTH}"])["doctors"]
-            intervals = INTERVALS["doctors"]
             doctors = list(filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
             day_today, month_today, year_today = map(int, session["interval"][0].split("."))
             day_week, month_week, year_week = map(int, session["interval"][1].split("."))
+            time_is = str(dt.datetime.now()).split()[1].split(":")[:2]
+            time_is = int(time_is[0]) * 60 + int(time_is[1])
             date_today = dt.date(day=day_today, month=month_today, year=year_today)
             date_week = dt.date(day=day_week, month=month_week, year=year_week)
             week = []
             for i in range(1, 8):
                 day = dt.date(int(year_today), int(month_today), int(day_today)) + dt.timedelta(days=i)
-                week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month]])
+                week.append([WEEK[day.weekday() - 1], str(day.day - 1) + " " + MONTHS[day.month - 1]])
             for doc in doctors:
+                current_schedules = []
+                last_date = date_today
                 for i in range(len(doc["schedules"])):
                     day, month, year = map(int, doc["schedules"][i]["date"].split("."))
                     date = dt.date(year=year, day=day, month=month)
-                    if date >= date_today and date_week >= date:
-                        doc["schedules"] = doc["schedules"][i:]
-                        break
+                    if date >= date_today:
+                        if date_week >= date:
+                            if last_date != date:
+                                current_schedules = (current_schedules +
+                                                     [[] for k in
+                                                      range(int(str(date - last_date).split()[0]) - 1)]
+                                                     + [doc["schedules"][i]])
+                            else:
+                                current_schedules = (current_schedules + [doc["schedules"][i]])
+                            last_date = date
+                        else:
+                            break
+                if len(current_schedules) < 7:
+                    doc["schedules"] = (current_schedules[::]
+                                        + [[] for k in range(7 - len(current_schedules))])
+                else:
+                    doc["schedules"] = current_schedules[::]
+                for schedule in doc["schedules"]:
+                    if schedule != []:
+                        for interval in schedule["intervals"]:
+                            if interval["free"]:
+                                schedule["free"] = True
             session["steps"] = session["steps"][:1] + [doctors]
-            return render_template("appointment_step_2.html", doctors=doctors, step=session["step"], week=week)
+            return render_template("appointment_step_2.html", doctors=doctors, step=session["step"],
+                                   week=week, time=time_is, int=int, len=len)
         elif session["step"] == 2:
             intervals = session["steps"][1]["schedules"]
             session["steps"] = session["steps"][:2] + [intervals]
@@ -131,14 +154,24 @@ def get_appointment():
 @app.route("/change_interval/<int:change_type>")
 def change_interval(change_type):
     if change_type == 1:
-        day = str(session["interval"][1].split("."))
-        new_date = dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) + dt.timedelta(days=7)
+        day = session["interval"][1].split(".")
+        print(day)
+        new_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
+                                + dt.timedelta(days=6)).split("-")[::-1])
         session["interval"] = [session["interval"][1], new_date]
-    else:
-        day = str(session["interval"][0].split("."))
-        old_date = dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)
+    elif change_type == 2:
+        day = session["interval"][0].split(".")
+        old_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=6)).split("-")[::-1])
         session["interval"] = [old_date, session["interval"][0]]
+    else:
+        session["interval"] = [TODAY, NEXT_WEEK]
+    print(session["interval"])
     return redirect("/appointment")
+
+
+@app.route("/select_doc/<int:doc_id>/<int:day_id>")
+def select_doc():
+    pass
 
 
 @app.route("/change_step/<string:step>/<string:ind>", methods=["GET", "POST"])
@@ -174,6 +207,7 @@ def check_note(note_id):
 def clear_session():
     session["step"] = 0
     session["steps"] = []
+    session['interval'] = []
     return redirect(f"/self_page/{current_user.id}")
 
 
@@ -186,7 +220,6 @@ def self_page(self_id):
     params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
               "fields[]=birthdate", "fields[]=email"]
     patient = get_response("medcards", str(current_user.med_card_id), params)
-    pprint.pprint(patient)
     notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
     form = NoteForm()
     if form.validate_on_submit():

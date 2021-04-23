@@ -2,6 +2,7 @@ import time
 import jwt as pyjwt
 import requests
 import datetime as dt
+from pprint import pprint
 
 api_id = '1e02efa605f4745744d7281ae1af28a0'
 api_secret = "f2a08627c8a550488f309bce75089a39"
@@ -21,7 +22,8 @@ TODAY = ".".join(today)
 month = dt.date(day=int(today[0]), month=int(today[1]), year=int(today[2])) + dt.timedelta(days=30)
 NEXT_MONTH = ".".join(str(month).split()[0].split("-")[::-1])
 week = dt.date(day=int(today[0]), month=int(today[1]), year=int(today[2])) + dt.timedelta(days=7)
-NEXT_WEEK = ".".join(str(month).split()[0].split("-")[::-1])
+NEXT_WEEK = ".".join(str(week).split()[0].split("-")[::-1])
+time_is = ":".join(str(dt.datetime.now()).split()[1].split(":")[:2])
 
 
 def get_response(method, id="", params=""):
