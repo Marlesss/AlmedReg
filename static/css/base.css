@@ -69,6 +69,10 @@ border-bottom-color: transparent;
     height: 40px;
 }
 
+.row-auto {
+    width: auto;
+}
+
 .logo_container {
     display: table-cell;
     vertical-align: middle;
@@ -96,6 +100,11 @@ border-bottom-color: transparent;
 .col-info {
     vertical-align: middle;
 }
+
+.col-auto {
+    width: auto;
+}
+
 
 .control_col {
     display: table-cell;

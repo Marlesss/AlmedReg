@@ -6,6 +6,8 @@ jQuery(function($){
    $("#phone").mask("+7(999)999-99-99",{autoclear: false});
 });
 
+
+
 </script>
 <h3>Регистрация</h3>
 <form action="" method="post">
@@ -39,18 +41,19 @@ jQuery(function($){
     </p>
     <p>
 
-        {{ form.telephone.label }} <br>
-        {{ form.telephone(class="form-control", type="telephone", id="phone") }} <br>
-        {% for error in form.telephone.errors %}
+        {{ form.birthdate.label }} <br>
+        {{ form.birthdate(class="form-control", type="date", id="birthdate") }} <br>
+        {% for error in form.birthdate.errors %}
     <p class="alert alert-danger" role="alert">
         {{ error }}
     </p>
     {% endfor %}
     </p>
     <p>
-        {{ form.email.label }} <br>
-        {{ form.email(class="form-control", type="email") }} <br>
-        {% for error in form.email.errors %}
+
+        {{ form.phone.label }} <br>
+        {{ form.phone(class="form-control", type="phone", id="phone") }} <br>
+        {% for error in form.phone.errors %}
     <p class="alert alert-danger" role="alert">
         {{ error }}
     </p>

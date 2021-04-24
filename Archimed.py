@@ -30,7 +30,7 @@ def get_response(method, id="", params=""):
     return response
 
 
-def post_response(method, data_inp, id="", params=""):
+def post_response(method, data, id="", params=""):
     global jwt
     if time.time() >= last_jwt:
         jwt = get_jwt()
@@ -38,7 +38,7 @@ def post_response(method, data_inp, id="", params=""):
     header = {"Authorization": "Bearer " + jwt}
     if params != "":
         params = "&".join(params)
-    response = requests.post(url, data=data_inp, headers=header).json()
+    response = requests.post(url, data=data, headers=header).json()
     return response
 
 
@@ -51,6 +51,12 @@ def put_response(method, data, id=""):
     response = requests.put(url, data=data, headers=header).json()
     return response
 
+
+def create_med_card(data):
+    return post_response("medcards", data)
+
+
+# pprint(get_response("medcards", id="14401"))
 
 # pprint(get_response("doctors", id="20"))
 
@@ -127,4 +133,4 @@ def put_response(method, data, id=""):
 
 # 20704
 
-pprint(get_response("intervals", params=["date_from=20.04.2021", "date_to=28.04.2021"]))
+# pprint(get_response("intervals", params=["date_from=20.04.2021", "date_to=28.04.2021"]))

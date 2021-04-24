@@ -11,8 +11,7 @@ class User(SQLAlchemyBase, UserMixin):
     SUPERADMIN, ADMIN, PATIENT, DOCTOR = -10, 0, 5, 10
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    telephone = sqlalchemy.Column(sqlalchemy.String, index=True, nullable=False)
-    email = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    phone = sqlalchemy.Column(sqlalchemy.String, index=True, nullable=False)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     med_card_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)

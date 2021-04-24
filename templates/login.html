@@ -5,24 +5,15 @@
 jQuery(function($){
    $("#phone").mask("+7(999)999-99-99",{autoclear: false});
 });
+
 </script>
 <h1>Авторизация</h1>
 <form action="" method="POST">
     {{ form.hidden_tag() }}
     <p>
-
-        {{ form.telephone.label }} <br>
-        {{ form.telephone(class="form-control", type="telephone", id="phone") }} <br>
-        {% for error in form.telephone.errors %}
-    <p class="alert alert-danger" role="alert">
-        {{ error }}
-    </p>
-    {% endfor %}
-    </p>
-    <p>
-        {{ form.email.label }} <br>
-        {{ form.email(class="form-control", type="email") }} <br>
-        {% for error in form.email.errors %}
+        {{ form.phone.label }} <br>
+        {{ form.phone(class="form-control", type="phone", id="phone") }} <br>
+        {% for error in form.phone.errors %}
     <p class="alert alert-danger" role="alert">
         {{ error }}
     </p>

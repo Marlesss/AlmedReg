@@ -3,17 +3,18 @@ from flask import session as note_session
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import datetime
-import pprint
+from pprint import pprint
 
 from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
 from Forms.search_form import SearchForm
 from Forms.note_form import NoteForm
+from Forms.user_management_form import UserManagementForm
 from Forms.change_password_form import ChangePasswordForm
 from data import db_session
 from data.users import User
 from for_tests import TALONS, PATIENT, DOCTOR
-from Archimed import get_response, get_jwt
+from Archimed import *
 
 REGISTER_STEPS = []
 
@@ -49,9 +50,9 @@ def text_without_letters(text):
 def main():
     db_session.global_init("db/almed_database.db")
     session = db_session.create_session()
-    admin = session.query(User).filter(User.email == "admin").first()
+    admin = session.query(User).filter(User.phone == "+70000000000").first()
     if not admin:
-        admin = User(telephone="admin", email="admin@admin", type_of_user=User.SUPERADMIN)
+        admin = User(phone="+70000000000", type_of_user=User.SUPERADMIN)
         admin.set_password("admin")
         session.add(admin)
         session.commit()
@@ -70,32 +71,44 @@ def register():
         return redirect("/")
     form = RegisterForm()
     if form.validate_on_submit():
-        phone = unformated_phone(form.telephone.data)
+        phone = unformated_phone(form.phone.data)
         session = db_session.create_session()
         # Проверка на корректность данных
         if form.password.data != form.password_again.data:
             return render_template("register.html", title="Регистрация", form=form,
-                                   message="Пароли не совпадают!")
+                                   message="Пароли не совпадают")
         if "_" in phone:
             return render_template("register.html", title="Регистрация", form=form,
-                                   message="Введите номер телефона!")
+                                   message="Введите номер телефона")
         # /Проверка на корректность данных
         # Проверка на уникальность данных
-        if session.query(User).filter(User.telephone == phone).first():
+        if session.query(User).filter(User.phone == phone).first():
             return render_template("register.html", title="Регистрация", form=form,
-                                   message="Этот номер телефона уже зарегистрирован!")
-        if form.email.data and session.query(User).filter(User.email == form.email.data).first():
-            return render_template("register.html", title="Регистрация", form=form,
-                                   message="Эта электронная почта уже зарегистрирована!")
+                                   message="Этот номер телефона уже зарегистрирован")
         # /Проверка на уникальность данных
         # Создаём мед. карту
-        print(form.first_name.data, form.middle_name.data, form.surname.data)
+        data = {
+            "last_name": form.surname.data,
+            "first_name": form.first_name.data,
+            "middle_name": form.middle_name.data,
+            "birthdate": f"{str(form.birthdate.data.day).rjust(2, '0')}.\
+{str(form.birthdate.data.month).rjust(2, '0')}.{str(form.birthdate.data.year).rjust(4, '0')}",
+            "phone": phone
+        }
+        # report = create_med_card(data)
+        report = {
+            "status": "Ok",
+            "id": 1234
+        }
+        print(report)
         # /Создаём мед. карту
+        if report['status'] != "Ok":
+            return render_template("register.html", title="Регистрация", form=form,
+                                   message="Ошибка при регистрации")
         user = User(
-            telephone=phone
+            phone=phone,
+            med_card_id=report["id"]
         )
-        if form.email.data:
-            user.email = form.email.data
         user.set_password(form.password.data)
         session.add(user)
         session.commit()
@@ -226,23 +239,19 @@ def login():
         return redirect("/")
     form = LoginForm()
     if form.validate_on_submit():
-        phone = unformated_phone(form.telephone.data)
-        email = form.email.data
-        if "_" in phone and not email:
+        phone = unformated_phone(form.phone.data)
+        if "_" in phone:
             return render_template("login.html", title="Авторизация",
-                                   message="Введите номер телефона или адрес электронной почты",
+                                   message="Введите номер телефона",
                                    form=form)
 
         session = db_session.create_session()
-        if phone:
-            user = session.query(User).filter(User.telephone == phone).first()
-        else:
-            user = session.query(User).filter(User.email == email).first()
+        user = session.query(User).filter(User.phone == phone).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template("login.html", title="Авторизация",
-                               message="Неправильный логин или пароль", form=form)
+                               message="Неправильный номер телефона или пароль", form=form)
     return render_template("login.html", title="Авторизация", form=form)
 
 
@@ -264,8 +273,7 @@ def admin_interface():
         list_of_users = session.query(User)
         if form.text.data:
             filter_text = f'%{form.text.data}%'
-            list_of_users = list_of_users.filter(User.telephone.like(filter_text) |
-                                                 User.email.like(filter_text))
+            list_of_users = list_of_users.filter(User.phone.like(filter_text))
         list_of_users = list_of_users.all()
         return render_template("admin.html", title="Панель администратора",
                                list_of_users=list_of_users, form=form)
@@ -284,11 +292,12 @@ def redefine_role(role, id):
         user = session.query(User).get(id)
         user.type_of_user = {"admin": User.ADMIN, "patient": User.PATIENT,
                              "doctor": User.DOCTOR}[role]
+        user.med_card_id = None
         session.merge(user)
         session.commit()
     except Exception:
         pass
-    return redirect("/admin")
+    return redirect(f"/user_management/{id}")
 
 
 @app.route("/change_password", methods=["GET", "POST"])
@@ -325,6 +334,59 @@ def delete_user(id):
     except Exception:
         pass
     return redirect("/admin")
+
+
+@app.route("/user_management/<int:id>", methods=["GET", "POST"])
+def user_management(id):
+    if not (current_user.is_authenticated and
+            current_user.type_of_user in (User.ADMIN, User.SUPERADMIN)):
+        return redirect("/")
+    session = db_session.create_session()
+    user = session.query(User).get(id)
+    if not user or user.type_of_user <= current_user.type_of_user:
+        return redirect("/")
+    form = UserManagementForm()
+    if form.validate_on_submit():
+        try:
+            med_card_id = int(form.med_card_id.data)
+        except Exception:
+            return render_template("card.html", title="Управление пользователем", user=user,
+                                   form=form, message="Ошибка при вводе id")
+        if user.type_of_user == user.PATIENT:
+            report = get_response("medcards",
+                                  params=["filters[0][field]=number",
+                                          f"filters[0][value]={med_card_id}"])
+            if not report['data']:
+                return render_template("card.html", title="Управление пользователем", user=user,
+                                       form=form, message="Мед. карта не найдена")
+            med_card = report['data'][0]
+            user.med_card_id = med_card['id']
+            session.merge(user)
+            session.commit()
+            return render_template("card.html", title="Управление пользователем", user=user,
+                                   form=form,
+                                   message=f"Мед. карта на имя {med_card['last_name']}\
+ {med_card['first_name']} {med_card['middle_name']} найдена")
+        elif user.type_of_user == user.DOCTOR:
+            report = get_response("doctors", id=str(med_card_id))
+            if not report:
+                return render_template("card.html", title="Управление пользователем", user=user,
+                                       form=form, message="Доктор не найден")
+            user.med_card_id = report["id"]
+            session.merge(user)
+            session.commit()
+            return render_template("card.html", title="Управление пользователем", user=user,
+                                   form=form,
+                                   message=f"Доктор по имени {report['name']}\
+ {report['name1']} {report['name2']} найден")
+
+        return render_template("card.html", title="Управление пользователем", user=user,
+                               form=form)
+    if user.med_card_id:
+        med_card = get_response("medcards", id=str(user.med_card_id))
+        form.med_card_id.data = med_card["number"]
+    return render_template("card.html", title="Управление пользователем", user=user,
+                           form=form)
 
 
 if __name__ == "__main__":
