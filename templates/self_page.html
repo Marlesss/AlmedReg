@@ -9,29 +9,55 @@
         <h2 align="center">Моя<br>Карта</h2>
         <div class="card">
            <div class="card-avatar">
-              <img src="../static/img/patient.png">
+              {% if type == 5 %}
+                <img src="../static/img/patient.png">
+              {% else %}
+                <img src="../static/img/doc.png">
+              {% endif %}
            </div>
            <div class="card-details">
-              <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{ patient["middle_name"] }}</div>
-              <div class="occupation">Пациент</div>
-              <div class="card-about">
+              {% if type == 5 %}
+                  <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{ patient["middle_name"] }}</div>
+                  <div class="occupation">Пациент</div>
+              {% else %}
+                  <div class="name">{{ doctor["last_name"] }} {{ doctor["first_name"] }} {{ doctor["middle_name"] }}</div>
+                  <div class="occupation">Доктор</div>
+              {% endif %}
+
+               <div class="card-about">
                  <div class="item">
-                    <span class="value">Email:</span>
-                    <span class="label">{{ patient["email"] }}</span>
+                     {% if type == 5 %}
+                        <span class="value">Email:</span>
+                        <span class="label">{{ patient["email"] }}</span>
+                     {% else %}
+                        <span class="value">Специализация:</span>
+                        <span class="label">{{ doc["type"] }}</span>
+                     {% endif %}
                  </div>
               </div>
                <div class="card-about">
                  <div class="item">
-                    <span class="value">Birthday:</span>
-                    <span class="label">{{ patient["birthdate"] }}</span>
+                     {% if type == 5 %}
+                        <span class="value">Birthday:</span>
+                        <span class="label">{{ patient["birthdate"] }}</span>
+                     {% else %}
+                        <span class="value">Учёная степень:</span>
+                        <span class="label">{{ doc["scientific_degree"] }}</span>
+                     {% endif %}
                  </div>
               </div>
            </div>
         </div>
-            <div class="info"><a class="btn btn-success" href="/appointment">Записаться на приём</a></div>
+            {% if type == 5%}
+                <div class="info"><a class="btn btn-success" href="/appointment">Записаться на приём</a></div>
+            {% endif %}
         </div>
         <div class="notes">
-            <h2 align="center">Мои<br>Записи</h2>
+            {% if type == 5%}
+                <h2 align="center">Мои<br>Записи</h2>
+            {% else %}
+                <h2 align="center">Записи<br>ко мне</h2>
+            {% endif %}
             <form class="form-inline" method="post">
                 {{ form.hidden_tag() }}
                 <div class="form-group">
@@ -49,18 +75,25 @@
                 {{ message }}
             </form>
             <div align="center" style="overflow:scroll;">
-                {% for note in notes %}
-                    {% if note["status_id"] == 1 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-success' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% elif note["status_id"] == 3 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-secondary' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% elif note["status_id"] == 4 %}
-                        <a href='/check_note/{{ note["id"] }}' class='btn btn-danger' style='width: 100%;'><div>{{ note["docs"][0]["type"]
-                            }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
-                    {% endif %}
-                {% endfor %}
+                {% if type == 5 %}
+                    {% for note in notes %}
+                        {% if note["status_id"] == 1 %}
+                            <a href='/check_note/{{ note["id"] }}' class='btn btn-success' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                                }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                        {% elif note["status_id"] == 3 %}
+                            <a href='/check_note/{{ note["id"] }}' class='btn btn-secondary' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                                }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                        {% elif note["status_id"] == 4 %}
+                            <a href='/check_note/{{ note["id"] }}' class='btn btn-danger' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                                }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% for note in notes %}
+                            <a href='/check_note/{{ note["id"] }}' class='btn btn-success' style='width: 100%;'><div>{{ note["docs"][0]["type"]
+                                }}</div><br><div style="float: left">{{ note["date"] }}</div><div style="float: right">{{ ":".join(note["begintime"].split(":")[:2]) }}</div></a><br>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>

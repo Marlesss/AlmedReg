@@ -6,7 +6,7 @@
         <div class="change_interval">
             <div class="row">
                 <div class="change_cells">
-                    <div class="change_btn"><p align="center">С {{week[0][0]}} {{week[0][1]}} по {{week[-1][0]}} {{week[-1][1]}}</p></div>
+                    <div class="change_btn"><p class="btn_text">С {{week[0][0]}} {{week[0][1]}} по {{week[-1][0]}} {{week[-1][1]}}</p></div>
                     {% if not today %}
                     <div class="change_btn"><a href="/change_interval/3" class="btn btn-primary">Вернуться</a></div>
                     {% else %}
@@ -50,19 +50,19 @@
                             + int(doc["schedules"][i]["start"].split(":")[1]) <= time and
                             time <= int(doc["schedules"][i]["end"].split(":")[0]) * 60
                             + int(doc["schedules"][i]["end"].split(":")[1]) and doc["schedules"][i]["free"]%}
-                            <a class="btn btn-success" href="/select_doc/{{ nodeloop.index - 1 }}/{{ i }}"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                            <a class="btn btn-success" href="/select_doc/{{ nodeloop.index - 1 }}/{{ i }}"><p class="fs-3">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
                         {% else %}
-                            <a class="btn btn-secondary"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                            <a class="btn btn-secondary"><p class="fs-3">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
                         {%endif%}
                     {% else %}
                         {% if doc["schedules"][i]["free"]%}
-                            <a class="btn btn-success" href="/select_doc/{{ nodeloop.index - 1 }}/{{ i }}"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                            <a class="btn btn-success" href="/select_doc/{{ nodeloop.index - 1 }}/{{ i }}"><p class="fs-3">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
                         {% else %}
-                            <a class="btn btn-secondary"><p class="fs-4">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
+                            <a class="btn btn-secondary"><p class="fs-3">{{ doc["schedules"][i]["start"] }} - {{ doc["schedules"][i]["end"] }}</p></a>
                         {%endif%}
                     {% endif %}
                     {% else %}
-                        <a class="btn btn-secondary"><p class="fs-3">Нет приёма</p></a>
+                        <a class="btn btn-secondary"><p class="fs-3 btn_text">Нет приёма</p></a>
                     {% endif %}
                 </div>
                 {% endfor %}

@@ -48,6 +48,11 @@ def text_without_letters(text):
     return date
 
 
+def date_int(date):
+    date_time = date.split()
+    return sum(map(int, date_time[0].split("."))) + sum(map(int, date_time[1].split(":")))
+
+
 def main():
     db_session.global_init("db/almed_database.db")
     session = db_session.create_session()
@@ -182,6 +187,8 @@ def change_interval(change_type):
                                 + dt.timedelta(days=1)).split("-")[::-1])
         session["interval"] = [left_date, right_date]
     elif change_type == 2:
+        if session["interval"][0] == TODAY:
+            return redirect("/appointment")
         day = session["interval"][0].split(".")
         left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)).split("-")[::-1])
         right_date = ".".join(
@@ -208,9 +215,11 @@ def change_step(step, ind):
     if step != "finish":
         step = int(step)
     else:
-        session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
-        appointment = session["steps"]
-        return render_template("appointment_finish.html", appointment=appointment)
+        if len(session["steps"]) == 3:
+            session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
+            appointment = session["steps"]
+            return render_template("appointment_finish.html", appointment=appointment)
+        return redirect("/appointment")
     print(session["step"], session["steps"], ind, sep="\n")
     if ind >= 0:
         session["steps"][session["step"]] = session["steps"][session["step"]][ind]
@@ -248,39 +257,55 @@ def clear_session():
     session["step"] = 0
     session["steps"] = []
     session['interval'] = []
-    return redirect(f"/self_page/{current_user.id}")
+    return redirect(f"/self_page")
 
 
-@app.route("/self_page/<int:self_id>", methods=["GET", "POST"])
-def self_page(self_id):
+@app.route("/self_page", methods=["GET", "POST"])
+def self_page():
     if not current_user.is_authenticated:
         return redirect("/")
-    if current_user.id != self_id:
-        return redirect("/")
-    params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
-              "fields[]=birthdate", "fields[]=email"]
-    patient = get_response("medcards", str(current_user.med_card_id), params)
-    notes = list(filter(lambda note: note["patient_id"] == patient["id"],
-                        get_response("talons",
-                                     params=["filters[0][field]=patient_id",
-                                             f"filters[0][value]={patient['id']}"])["data"]))
-    form = NoteForm()
-    if form.validate_on_submit():
-        text = form.text.data
-        if text == "":
-            pass
-        elif not text.isalpha():
-            date = text_without_letters(text)
-            notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
-        else:
-            notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
-    green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
-    grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
-    red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
-    notes = (sorted(green_notes, key=lambda note: note["datetime"])
-             + sorted(red_notes, key=lambda note: note["datetime"])
-             + sorted(grey_notes, key=lambda note: note["datetime"]))
-    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form)
+    if current_user.type_of_user == 5:
+        params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
+                  "fields[]=birthdate", "fields[]=email"]
+        patient = get_response("medcards", str(current_user.med_card_id), params)
+        notes = get_response(f"medcards/{patient['id']}/talons")["data"]
+        form = NoteForm()
+        if form.validate_on_submit():
+            text = form.text.data
+            if text == "":
+                pass
+            elif not text.isalpha():
+                date = text_without_letters(text)
+                notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
+            else:
+                notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+        green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
+        grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
+        red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
+        notes = (sorted(green_notes, key=lambda note: date_int(note["datetime"]))
+                 + sorted(red_notes, key=lambda note: date_int(note["datetime"]))
+                 + sorted(grey_notes, key=lambda note: date_int(note["datetime"])))
+        return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form, type=5)
+    else:
+        params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
+                  "fields[]=type", "fields[]=scientific_degree"]
+        doctor = get_response("doctors", str(current_user.med_card_id), params)
+        notes = get_response(f"/doctors/{current_user.med_card_id}/talons", params=["filters[0][field]=status_id",
+                                                                                    "filters[0][value]=1", ])["data"]
+        form = NoteForm()
+        if form.validate_on_submit():
+            text = form.text.data
+            if text == "":
+                pass
+            elif not text.isalpha():
+                date = text_without_letters(text)
+                notes = list(
+                    filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."),
+                           notes))
+            else:
+                notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+        notes = sorted(notes, key=lambda note: date_int(note["datetime"]))
+        return render_template("self_page.html", title="Личный кабинет", notes=notes, doctor=doctor, form=form, type=10)
 
 
 @app.route("/login", methods=['GET', "POST"])
