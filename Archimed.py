@@ -21,7 +21,7 @@ today = str(dt.datetime.today()).split()[0].split("-")[::-1]
 TODAY = ".".join(today)
 month = dt.date(day=int(today[0]), month=int(today[1]), year=int(today[2])) + dt.timedelta(days=30)
 NEXT_MONTH = ".".join(str(month).split()[0].split("-")[::-1])
-week = dt.date(day=int(today[0]), month=int(today[1]), year=int(today[2])) + dt.timedelta(days=7)
+week = dt.date(day=int(today[0]), month=int(today[1]), year=int(today[2])) + dt.timedelta(days=6)
 NEXT_WEEK = ".".join(str(week).split()[0].split("-")[::-1])
 time_is = ":".join(str(dt.datetime.now()).split()[1].split(":")[:2])
 
@@ -36,3 +36,4 @@ def get_response(method, id="", params=""):
         params = "&".join(params)
     response = requests.get(url + id + "?" + params, headers=header).json()
     return response
+

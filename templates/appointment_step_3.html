@@ -1,7 +1,13 @@
 {% extends "appointment.html" %}
 
 {% block step_content %}
-    {% for interval in intervals %}
-        <a href="/change_step/finish/{{ loop.index - 1 }}">{{ interval }}</a><br>
-    {% endfor %}
+    <div align="center">
+        {% for interval in intervals["intervals"] %}
+            {% if interval["free"] %}
+                <a href="/change_step/finish/{{ loop.index - 1 }}" class="btn btn-success" style="width: 100px; height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+            {% else %}
+                <a class="btn btn-secondary" style="width: 100px; height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endblock %}

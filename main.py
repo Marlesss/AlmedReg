@@ -107,9 +107,9 @@ def get_appointment():
             date_today = dt.date(day=day_today, month=month_today, year=year_today)
             date_week = dt.date(day=day_week, month=month_week, year=year_week)
             week = []
-            for i in range(1, 8):
+            for i in range(7):
                 day = dt.date(int(year_today), int(month_today), int(day_today)) + dt.timedelta(days=i)
-                week.append([WEEK[day.weekday() - 1], str(day.day - 1) + " " + MONTHS[day.month - 1]])
+                week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month - 1]])
             for doc in doctors:
                 current_schedules = []
                 last_date = date_today
@@ -118,10 +118,10 @@ def get_appointment():
                     date = dt.date(year=year, day=day, month=month)
                     if date >= date_today:
                         if date_week >= date:
-                            if last_date != date:
+                            if date.day - last_date.day > 1:
                                 current_schedules = (current_schedules +
                                                      [[] for k in
-                                                      range(int(str(date - last_date).split()[0]) - 1)]
+                                                      range(int(str(date - last_date).split()[0]))]
                                                      + [doc["schedules"][i]])
                             else:
                                 current_schedules = (current_schedules + [doc["schedules"][i]])
@@ -139,11 +139,16 @@ def get_appointment():
                             if interval["free"]:
                                 schedule["free"] = True
             session["steps"] = session["steps"][:1] + [doctors]
+            if session["interval"][0] == TODAY:
+                today = True
+            else:
+                today = False
             return render_template("appointment_step_2.html", doctors=doctors, step=session["step"],
-                                   week=week, time=time_is, int=int, len=len)
+                                   week=week, time=time_is, int=int, len=len, today=today)
         elif session["step"] == 2:
             intervals = session["steps"][1]["schedules"]
             session["steps"] = session["steps"][:2] + [intervals]
+            print(intervals)
             return render_template("appointment_step_3.html", intervals=intervals, step=session["step"])
         else:
             return render_template("appointment_finish.html", appointment=session["steps"], step=session["step"])
@@ -155,23 +160,29 @@ def get_appointment():
 def change_interval(change_type):
     if change_type == 1:
         day = session["interval"][1].split(".")
-        print(day)
-        new_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
-                                + dt.timedelta(days=6)).split("-")[::-1])
-        session["interval"] = [session["interval"][1], new_date]
+        right_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
+                                + dt.timedelta(days=7)).split("-")[::-1])
+        left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
+                                + dt.timedelta(days=1)).split("-")[::-1])
+        session["interval"] = [left_date, right_date]
     elif change_type == 2:
         day = session["interval"][0].split(".")
-        old_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=6)).split("-")[::-1])
-        session["interval"] = [old_date, session["interval"][0]]
+        left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)).split("-")[::-1])
+        right_date = ".".join(
+            str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=1)).split("-")[::-1])
+        session["interval"] = [left_date, right_date]
     else:
         session["interval"] = [TODAY, NEXT_WEEK]
     print(session["interval"])
     return redirect("/appointment")
 
 
-@app.route("/select_doc/<int:doc_id>/<int:day_id>")
-def select_doc():
-    pass
+@app.route("/select_doc/<int:doc_ind>/<int:day_ind>")
+def select_doc(doc_ind, day_ind):
+    session["steps"][session["step"]] = session["steps"][session["step"]][doc_ind]
+    session["steps"][session["step"]]["schedules"] = session["steps"][session["step"]]["schedules"][day_ind]
+    session["step"] = 2
+    return redirect("/appointment")
 
 
 @app.route("/change_step/<string:step>/<string:ind>", methods=["GET", "POST"])
@@ -181,7 +192,7 @@ def change_step(step, ind):
     if step != "finish":
         step = int(step)
     else:
-        session["steps"][session["step"]] = session["steps"][session["step"]][ind]
+        session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
         appointment = session["steps"]
         return render_template("appointment_finish.html", appointment=appointment)
     print(session["step"], session["steps"], ind, sep="\n")
@@ -193,14 +204,27 @@ def change_step(step, ind):
 
 @app.route("/check_note/<int:note_id>", methods=["GET", "POST"])
 def check_note(note_id):
-    notes = TALONS["data"]
-    for note in notes:
-        if note["id"] == note_id and note["patient_id"] == current_user.med_card_id:
-            patient = PATIENT
-            doctor = DOCTOR
-            return render_template("check_note.html", note=note, patient=patient, doc=doctor)
+    note = get_response("talons", id=str(note_id))
+    if note and note["patient_id"] == current_user.med_card_id:
+        patient = get_response("medcards", id=str(note["patient_id"]))
+        doctor = get_response("doctors", id=str(note["docs"][0]["id"]))
+        return render_template("check_note.html", note=note, patient=patient, doc=doctor)
     print("Не нашлось талона")
     return redirect("/")
+
+
+@app.route("/post_appointment")
+def post_appointment():
+    pprint.pprint(session["steps"])
+    post_data = {
+        "doc_id": session["steps"][1]["id"],
+        "begintime": session["steps"][2]["start"],
+        "date": session["steps"][1]["schedules"]["date"],
+        "patient_id": current_user.med_card_id
+    }
+    print(post_data)
+    # Тута пост запрос
+    return redirect("/clear_session")
 
 
 @app.route("/clear_session")
@@ -220,7 +244,10 @@ def self_page(self_id):
     params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
               "fields[]=birthdate", "fields[]=email"]
     patient = get_response("medcards", str(current_user.med_card_id), params)
-    notes = list(filter(lambda note: note["patient_id"] == patient["id"], TALONS["data"]))
+    notes = list(filter(lambda note: note["patient_id"] == patient["id"],
+                        get_response("talons",
+                                     params=["filters[0][field]=patient_id",
+                                             f"filters[0][value]={patient['id']}"])["data"]))
     form = NoteForm()
     if form.validate_on_submit():
         text = form.text.data
