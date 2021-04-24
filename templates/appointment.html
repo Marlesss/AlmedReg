@@ -7,26 +7,21 @@
 	<h2>Запись на приём</h2>
 	<nav>
 		<ol class="cd-multi-steps text-center">
-			{% if step > 1%}
-				<li class="visited"><a href="/appointment/1">Корпус</a></li>
-			{% else %}
-				<li class="current"><a href="#">Корпус</a></li>
-			{% endif %}
-			{% if step > 2%}
-				<li class="visited"><a href="/appointment/2/{{ chosen_building }}">Специализация</a></li>
-			{% elif step == 2 %}
+			{% if step > 0%}
+				<li class="visited"><a href="/change_step/0/-1">Специализация</a></li>
+			{% elif step == 0 %}
 				<li class="current"><a href="#">Специализация</a></li>
 			{% else %}
 				<li><em>Специализация</em></li>
 			{% endif %}
-			{% if step > 3%}
-				<li class="visited"><a href="/appointment/3/{{ chosen_building }}/{{ chosen_specialization }}">Врач</a></li>
-			{% elif step == 3 %}
+			{% if step > 1%}
+				<li class="visited"><a href="/change_step/1/-1">Врач</a></li>
+			{% elif step == 1 %}
 				<li class="current"><a href="#">Врач</a></li>
 			{% else %}
 				<li><em>Врач</em></li>
 			{% endif %}
-			{% if step == 4 %}
+			{% if step == 2 %}
 				<li class="current"><a href="#">Время</a></li>
 			{% else %}
 				<li><em>Время</em></li>

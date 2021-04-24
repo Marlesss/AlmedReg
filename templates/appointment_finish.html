@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <p>Ждем на прием в {{ chosen_building }}</p>
-    <p>Вы записались к {{ chosen_specialization }}</p>
-    <p>Вас примет {{ chosen_doc }}</p>
-    <p>Необходимо подойти в {{ chosen_interval }}</p>
+    <p>Вы записались к {{ appointment[0]["name"] }}</p>
+    <p>Вас примет {{ appointment[1]["name"] }}</p>
+    <p>Приходите к {{ appointment[2]["start"] }}</p>
+    <a href="/post_appointment">Зашибись</a>
 {% endblock %}
