@@ -7,8 +7,17 @@
 
 .doc_name{
     display: table-cell;
-    text-align: left;
+    text-align: center;
     width: 50%;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.time{
+    font-size: 20px;
+    vertical-align: middle;
+    min-width: 100px;
+    min-height: 50px;
 }
 
 .header{
@@ -27,23 +36,28 @@
     margin: 0;
 }
 
-.btn{
+.tbl{
     width: 100%;
     height: 70px;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .header_doc{
     display: table-cell;
-    text-align: center;
     font-style: bold;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .header_day{
     display: table-cell;
-    text-align: center;
     font-style: bold;
     min-width: 100px;
     max-width: 100px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 15px;
 }
 
 .doctor{
@@ -57,6 +71,7 @@
     width: 100%;
     padding-top: 10px;
     padding-bottom: 10px;
+    vertical-align: middle;
 }
 
 .change_cells{
@@ -64,18 +79,32 @@
     text-align: center;
     font-style: bold;
     width: 50%;
-    vertical-align: center;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .change_btn{
     font-style: bold;
     width: 50%;
     float: left;
-    vertical-align: center;
+    vertical-align: middle;
+    text-align: center;
+
+}
+
+.change{
+    font-style: bold;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .row {
     display: table-row;
     width: 100%;
-    margin: 100px;
+    padding-top: 20px;
+}
+
+
+.btn_text{
+    vertical-align: middle;
 }
