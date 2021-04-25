@@ -125,10 +125,14 @@ def get_appointment():
             session["step"] = 0
             spec = get_response("specializations")
             session["steps"] = [spec["data"]]
-            return render_template("appointment_step_1.html", specializations=spec["data"], step=session["step"])
+            return render_template("appointment_step_1.html", specializations=spec["data"],
+                                   step=session["step"])
         elif session["step"] == 1:
-            intervals = get_response("intervals", params=[f"date_from={TODAY}", f"date_to={NEXT_MONTH}"])["doctors"]
-            doctors = list(filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
+            intervals = \
+            get_response("intervals", params=[f"date_from={TODAY}", f"date_to={NEXT_MONTH}"])[
+                "doctors"]
+            doctors = list(
+                filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
             day_today, month_today, year_today = map(int, session["interval"][0].split("."))
             day_week, month_week, year_week = map(int, session["interval"][1].split("."))
             time_is = str(dt.datetime.now()).split()[1].split(":")[:2]
@@ -137,7 +141,8 @@ def get_appointment():
             date_week = dt.date(day=day_week, month=month_week, year=year_week)
             week = []
             for i in range(7):
-                day = dt.date(int(year_today), int(month_today), int(day_today)) + dt.timedelta(days=i)
+                day = dt.date(int(year_today), int(month_today), int(day_today)) + dt.timedelta(
+                    days=i)
                 week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month - 1]])
             for doc in doctors:
                 current_schedules = []
@@ -178,9 +183,11 @@ def get_appointment():
             intervals = session["steps"][1]["schedules"]
             session["steps"] = session["steps"][:2] + [intervals]
             print(intervals)
-            return render_template("appointment_step_3.html", intervals=intervals, step=session["step"])
+            return render_template("appointment_step_3.html", intervals=intervals,
+                                   step=session["step"])
         else:
-            return render_template("appointment_finish.html", appointment=session["steps"], step=session["step"])
+            return render_template("appointment_finish.html", appointment=session["steps"],
+                                   step=session["step"])
     except Exception as e:
         return render_template("appointment_step_1.html")
 
@@ -190,15 +197,18 @@ def change_interval(change_type):
     if change_type == 1:
         day = session["interval"][1].split(".")
         right_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
-                                + dt.timedelta(days=7)).split("-")[::-1])
+                                  + dt.timedelta(days=7)).split("-")[::-1])
         left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
-                                + dt.timedelta(days=1)).split("-")[::-1])
+                                 + dt.timedelta(days=1)).split("-")[::-1])
         session["interval"] = [left_date, right_date]
     elif change_type == 2:
         day = session["interval"][0].split(".")
-        left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)).split("-")[::-1])
+        left_date = ".".join(str(
+            dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(
+                days=7)).split("-")[::-1])
         right_date = ".".join(
-            str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=1)).split("-")[::-1])
+            str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(
+                days=1)).split("-")[::-1])
         session["interval"] = [left_date, right_date]
     else:
         session["interval"] = [TODAY, NEXT_WEEK]
@@ -209,7 +219,8 @@ def change_interval(change_type):
 @app.route("/select_doc/<int:doc_ind>/<int:day_ind>")
 def select_doc(doc_ind, day_ind):
     session["steps"][session["step"]] = session["steps"][session["step"]][doc_ind]
-    session["steps"][session["step"]]["schedules"] = session["steps"][session["step"]]["schedules"][day_ind]
+    session["steps"][session["step"]]["schedules"] = session["steps"][session["step"]]["schedules"][
+        day_ind]
     session["step"] = 2
     return redirect("/appointment")
 
@@ -264,11 +275,9 @@ def clear_session():
     return redirect(f"/self_page/{current_user.id}")
 
 
-@app.route("/self_page/<int:self_id>", methods=["GET", "POST"])
-def self_page(self_id):
+@app.route("/self_page", methods=["GET", "POST"])
+def self_page():
     if not current_user.is_authenticated:
-        return redirect("/")
-    if current_user.id != self_id:
         return redirect("/")
     params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
               "fields[]=birthdate", "fields[]=email"]
@@ -284,16 +293,20 @@ def self_page(self_id):
             pass
         elif not text.isalpha():
             date = text_without_letters(text)
-            notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
+            notes = list(filter(
+                lambda note: text_without_letters(note["date"]) == date or date in note[
+                    "date"].split("."), notes))
         else:
-            notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+            notes = list(
+                filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
     green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
     grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
     red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
     notes = (sorted(green_notes, key=lambda note: note["datetime"])
              + sorted(red_notes, key=lambda note: note["datetime"])
              + sorted(grey_notes, key=lambda note: note["datetime"]))
-    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form)
+    return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient,
+                           form=form)
 
 
 @app.route("/login", methods=['GET', "POST"])
