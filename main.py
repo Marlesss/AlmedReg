@@ -147,16 +147,21 @@ def get_appointment():
             form = NoteForm()
             if form.validate_on_submit():
                 spec_name = form.text.data
-                spec = sorted(list(filter(lambda sp: spec_name.lower() in sp["name"].lower(), spec)),
-                              key=lambda sp: sp["name"])
+                spec = sorted(
+                    list(filter(lambda sp: spec_name.lower() in sp["name"].lower(), spec)),
+                    key=lambda sp: sp["name"])
             else:
-                spec = sorted(list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec)), key=lambda sp: sp["name"])
+                spec = sorted(list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec)),
+                              key=lambda sp: sp["name"])
             session["steps"] = [list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec))]
-            return render_template("appointment_step_1.html", specializations=spec, step=session["step"], form=form)
+            return render_template("appointment_step_1.html", title="Запись на приём",
+                                   specializations=spec, step=session["step"], form=form)
         elif session["step"] == 1:
             intervals = get_response("intervals", params=[f"date_from={session['interval'][0]}",
-                                                          f"date_to={session['interval'][1]}"])["doctors"]
-            doctors = list(filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
+                                                          f"date_to={session['interval'][1]}"])[
+                "doctors"]
+            doctors = list(
+                filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
             day_today, month_today, year_today = map(int, session["interval"][0].split("."))
             day_week, month_week, year_week = map(int, session["interval"][1].split("."))
             time_is = str(dt.datetime.now()).split()[1].split(":")[:2]
@@ -170,7 +175,8 @@ def get_appointment():
                 week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month - 1]])
             for doc in doctors:
                 current_schedules = []
-                last_date = dt.date(int(year_today), int(month_today), int(day_today)) - dt.timedelta(days=1)
+                last_date = dt.date(int(year_today), int(month_today),
+                                    int(day_today)) - dt.timedelta(days=1)
                 for i in range(len(doc["schedules"])):
                     day, month, year = map(int, doc["schedules"][i]["date"].split("."))
                     date = dt.date(year=year, day=day, month=month)
@@ -201,7 +207,8 @@ def get_appointment():
                 today = True
             else:
                 today = False
-            return render_template("appointment_step_2.html", doctors=doctors, step=session["step"],
+            return render_template("appointment_step_2.html", title="Запись на приём",
+                                   doctors=doctors, step=session["step"],
                                    week=week, time=time_is, int=int, len=len, today=today)
         elif session["step"] == 2:
             intervals = session["steps"][1]["schedules"]
@@ -212,12 +219,16 @@ def get_appointment():
                 today = True
             else:
                 today = False
-            return render_template("appointment_step_3.html", intervals=intervals, step=session["step"], time=time_is,
+            return render_template("appointment_step_3.html", title="Запись на приём",
+                                   intervals=intervals,
+                                   step=session["step"], time=time_is,
                                    int=int, today=today)
         else:
-            return render_template("appointment_finish.html", appointment=session["steps"], step=session["step"])
+            return render_template("appointment_finish.html", title="Запись на приём",
+                                   appointment=session["steps"],
+                                   step=session["step"])
     except Exception as e:
-        return render_template("appointment_step_1.html")
+        return render_template("appointment_step_1.html", title="Запись на приём")
 
 
 @app.route("/change_interval/<int:change_type>")
@@ -225,17 +236,20 @@ def change_interval(change_type):
     if change_type == 1:
         day = session["interval"][1].split(".")
         right_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
-                                + dt.timedelta(days=7)).split("-")[::-1])
+                                  + dt.timedelta(days=7)).split("-")[::-1])
         left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2]))
-                                + dt.timedelta(days=1)).split("-")[::-1])
+                                 + dt.timedelta(days=1)).split("-")[::-1])
         session["interval"] = [left_date, right_date]
     elif change_type == 2:
         if session["interval"][0] == TODAY:
             return redirect("/appointment")
         day = session["interval"][0].split(".")
-        left_date = ".".join(str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=7)).split("-")[::-1])
+        left_date = ".".join(str(
+            dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(
+                days=7)).split("-")[::-1])
         right_date = ".".join(
-            str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(days=1)).split("-")[::-1])
+            str(dt.date(day=int(day[0]), month=int(day[1]), year=int(day[2])) - dt.timedelta(
+                days=1)).split("-")[::-1])
         session["interval"] = [left_date, right_date]
     else:
         session["interval"] = [TODAY, NEXT_WEEK]
@@ -245,7 +259,8 @@ def change_interval(change_type):
 @app.route("/select_doc/<int:doc_ind>/<int:day_ind>")
 def select_doc(doc_ind, day_ind):
     session["steps"][session["step"]] = session["steps"][session["step"]][doc_ind]
-    session["steps"][session["step"]]["schedules"] = session["steps"][session["step"]]["schedules"][day_ind]
+    session["steps"][session["step"]]["schedules"] = session["steps"][session["step"]]["schedules"][
+        day_ind]
     session["step"] = 2
     return redirect("/appointment")
 
@@ -259,9 +274,11 @@ def change_step(step, ind):
     else:
         if len(session["steps"]) == 3:
             if "intervals" in session["steps"][session["step"]]:
-                session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
+                session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][
+                    ind]
             appointment = session["steps"]
-            return render_template("appointment_finish.html", appointment=appointment)
+            return render_template("appointment_finish.html", title="Запись на приём",
+                                   appointment=appointment)
         return redirect("/appointment")
     if ind >= 0:
         session["steps"][session["step"]] = session["steps"][session["step"]][ind]
@@ -277,7 +294,8 @@ def check_note(note_id):
         doctor = get_response("doctors", id=str(note["docs"][0]["id"]))
         session["doctor"] = doctor
         session["note"] = note
-        return render_template("check_note.html", note=note, patient=patient, doc=doctor)
+        return render_template("check_note.html", title="Просмотр записи", note=note,
+                               patient=patient, doc=doctor)
     print("Не нашлось талона")
     return redirect("/")
 
@@ -289,7 +307,9 @@ def cancel_note():
         reason = form.reasons.data
         put_response("talons", {"status_id": 4}, id=str(session["note"]["id"]))
         return redirect("/self_page")
-    return render_template("cancel_note.html", note=session["note"], doc=session["doctor"], form=form)
+    return render_template("cancel_note.html", title="Отмена записи", note=session["note"],
+                           doc=session["doctor"],
+                           form=form)
 
 
 @app.route("/post_appointment")
@@ -319,7 +339,8 @@ def self_page():
     if not current_user.is_authenticated:
         return redirect("/")
     if current_user.type_of_user == 5:
-        params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
+        params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name",
+                  "fields[]=middle_name",
                   "fields[]=birthdate", "fields[]=email"]
         patient = get_response("medcards", str(current_user.med_card_id), params)
         notes = get_response(f"medcards/{patient['id']}/talons")["data"]
@@ -330,16 +351,20 @@ def self_page():
                 pass
             elif not text.isalpha():
                 date = text_without_letters(text)
-                notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
+                notes = list(filter(
+                    lambda note: text_without_letters(note["date"]) == date or date in note[
+                        "date"].split("."), notes))
             else:
-                notes = list(filter(lambda note: text.lower() in note["docs"][0]["type"].lower(), notes))
+                notes = list(
+                    filter(lambda note: text.lower() in note["docs"][0]["type"].lower(), notes))
         green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
         grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
         red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
         notes = (sorted(green_notes, key=lambda note: date_format(note["datetime"]))
                  + sorted(red_notes, key=lambda note: date_format(note["datetime"]))
                  + sorted(grey_notes, key=lambda note: date_format(note["datetime"])))
-        return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form, type=5)
+        return render_template("self_page.html", title="Личный кабинет", notes=notes,
+                               patient=patient, form=form, type=5)
     else:
         params = ["fields[]=id", "fields[]=name", "fields[]=name1", "fields[]=name2",
                   "fields[]=type", "fields[]=scientific_degree"]
@@ -355,12 +380,15 @@ def self_page():
             elif not text.isalpha():
                 date = text_without_letters(text)
                 notes = list(
-                    filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."),
+                    filter(lambda note: text_without_letters(note["date"]) == date or date in note[
+                        "date"].split("."),
                            notes))
             else:
-                notes = list(filter(lambda note: text.lower() in note["patient_name"].lower(), notes))
+                notes = list(
+                    filter(lambda note: text.lower() in note["patient_name"].lower(), notes))
         notes = sorted(notes, key=lambda note: date_format(note["datetime"]))
-        return render_template("self_page.html", title="Личный кабинет", notes=notes, doctor=doctor, form=form, type=10)
+        return render_template("self_page.html", title="Личный кабинет", notes=notes, doctor=doctor,
+                               form=form, type=10)
 
 
 @app.route("/login", methods=['GET', "POST"])
