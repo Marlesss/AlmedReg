@@ -34,6 +34,12 @@ p.notetime { color: #222;
     min-width: 500px;
 }
 
+.my_notes{
+    max-height: 255px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
 .visit{
     display: table-cell;
     vertical-align: top;

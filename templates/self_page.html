@@ -20,7 +20,7 @@
                   <div class="name">{{ patient["last_name"] }} {{ patient["first_name"] }} {{ patient["middle_name"] }}</div>
                   <div class="occupation">Пациент</div>
               {% else %}
-                  <div class="name">{{ doctor["last_name"] }} {{ doctor["first_name"] }} {{ doctor["middle_name"] }}</div>
+                  <div class="name">{{ doctor["name"] }} {{ doctor["name1"] }} {{ doctor["name2"] }}</div>
                   <div class="occupation">Доктор</div>
               {% endif %}
 
@@ -31,7 +31,7 @@
                         <span class="label">{{ patient["email"] }}</span>
                      {% else %}
                         <span class="value">Специализация:</span>
-                        <span class="label">{{ doc["type"] }}</span>
+                        <span class="label">{{ doctor["type"] }}</span>
                      {% endif %}
                  </div>
               </div>
@@ -42,7 +42,7 @@
                         <span class="label">{{ patient["birthdate"] }}</span>
                      {% else %}
                         <span class="value">Учёная степень:</span>
-                        <span class="label">{{ doc["scientific_degree"] }}</span>
+                        <span class="label">{{ doctor["scientific_degree"] }}</span>
                      {% endif %}
                  </div>
               </div>
@@ -61,7 +61,11 @@
             <form class="form-inline" method="post">
                 {{ form.hidden_tag() }}
                 <div class="form-group" align="center">
-                    {{ form.text.label }}
+                    {% if type == 5%}
+                        {{ form.text.label }}
+                    {% else %}
+                        Введите дату(День.Месяц.Год) или ФИО пациента
+                    {% endif %}
                 </div>
                 <div class="row">
                     <div class="col">
@@ -78,7 +82,7 @@
                 </p>
                 {{ message }}
             </form>
-            <div align="center" style="overflow:scroll;">
+            <div align="center" class="my_notes">
                 {% if type == 5 %}
                     {% for note in notes %}
                         {% if note["status_id"] == 1 %}

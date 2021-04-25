@@ -58,9 +58,15 @@ def text_without_letters(text):
     return date
 
 
-def date_int(date):
+def date_format(date):
     date_time = date.split()
-    return sum(map(int, date_time[0].split("."))) + sum(map(int, date_time[1].split(":")))
+    if len(date_time) == 2:
+        day, month, year = map(int, date_time[0].split("."))
+        hour, minute, second = map(int, date_time[1].split(":"))
+        return dt.datetime(day=day, month=month, year=year, minute=minute, hour=hour)
+    else:
+        day, month, year = map(int, date.split("."))
+        return dt.date(day=day, month=month, year=year)
 
 
 def main():
@@ -288,7 +294,7 @@ def cancel_note():
 
 @app.route("/post_appointment")
 def post_appointment():
-    pprint.pprint(session["steps"])
+    pprint(session["steps"])
     post_data = {
         "doc_id": session["steps"][1]["id"],
         "begintime": session["steps"][2]["start"],
@@ -296,7 +302,7 @@ def post_appointment():
         "patient_id": current_user.med_card_id
     }
     print(post_data)
-    # Тута пост запрос
+    # Тута пост запрос. Не делаю, чтобы бд не ломать
     return redirect("/clear_session")
 
 
@@ -326,20 +332,21 @@ def self_page():
                 date = text_without_letters(text)
                 notes = list(filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."), notes))
             else:
-                notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
+                notes = list(filter(lambda note: text.lower() in note["docs"][0]["type"].lower(), notes))
         green_notes = list(filter(lambda note: note["status_id"] == 1, notes))
         grey_notes = list(filter(lambda note: note["status_id"] == 3, notes))
         red_notes = list(filter(lambda note: note["status_id"] == 4, notes))
-        notes = (sorted(green_notes, key=lambda note: date_int(note["datetime"]))
-                 + sorted(red_notes, key=lambda note: date_int(note["datetime"]))
-                 + sorted(grey_notes, key=lambda note: date_int(note["datetime"])))
+        notes = (sorted(green_notes, key=lambda note: date_format(note["datetime"]))
+                 + sorted(red_notes, key=lambda note: date_format(note["datetime"]))
+                 + sorted(grey_notes, key=lambda note: date_format(note["datetime"])))
         return render_template("self_page.html", title="Личный кабинет", notes=notes, patient=patient, form=form, type=5)
     else:
-        params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name", "fields[]=middle_name",
+        params = ["fields[]=id", "fields[]=name", "fields[]=name1", "fields[]=name2",
                   "fields[]=type", "fields[]=scientific_degree"]
         doctor = get_response("doctors", str(current_user.med_card_id), params)
-        notes = get_response(f"/doctors/{current_user.med_card_id}/talons", params=["filters[0][field]=status_id",
-                                                                                    "filters[0][value]=1"])["data"]
+        notes = get_response(f"/doctors/{current_user.med_card_id}/talons")["data"]
+        print(notes)
+        notes = list(filter(lambda note: date_format(TODAY) < date_format(note["date"]), notes))
         form = NoteForm()
         if form.validate_on_submit():
             text = form.text.data
@@ -351,8 +358,8 @@ def self_page():
                     filter(lambda note: text_without_letters(note["date"]) == date or date in note["date"].split("."),
                            notes))
             else:
-                notes = list(filter(lambda note: note["docs"][0]["type"].lower() == text.lower(), notes))
-        notes = sorted(notes, key=lambda note: date_int(note["datetime"]))
+                notes = list(filter(lambda note: text.lower() in note["patient_name"].lower(), notes))
+        notes = sorted(notes, key=lambda note: date_format(note["datetime"]))
         return render_template("self_page.html", title="Личный кабинет", notes=notes, doctor=doctor, form=form, type=10)
 
 
