@@ -135,4 +135,4 @@ def put_response(method, data, id=""):
 
 # 20704
 
-pprint(get_response("intervals", params=["date_from=20.04.2021", "date_to=28.04.2021"]))
+# pprint(get_response("intervals", params=["date_from=20.04.2021", "date_to=28.04.2021"]))

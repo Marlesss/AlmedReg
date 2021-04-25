@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <p>Вы записались к {{ appointment[0]["name"] }}</p>
-    <p>Вас примет {{ appointment[1]["name"] }}</p>
-    <p>Приходите к {{ appointment[2]["start"] }}</p>
-    <a href="/post_appointment">Зашибись</a>
+    <h1 align="center">Проверьте данные записи</h1>
+    <p align="center">Вы записались к {{ appointment[0]["name"] }}</p>
+    <p align="center">Вас примет {{ appointment[1]["name"] }}</p>
+    <p align="center">Время приёма: {{ appointment[2]["start"] }}</p>
+    <div style="text-align:center;"><a href="/post_appointment" class="btn btn-success">Подтверждаю</a></div>
 {% endblock %}

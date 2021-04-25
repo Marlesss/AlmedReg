@@ -60,12 +60,16 @@
             {% endif %}
             <form class="form-inline" method="post">
                 {{ form.hidden_tag() }}
-                <div class="form-group">
-                {{ form.text.label }}
+                <div class="form-group" align="center">
+                    {{ form.text.label }}
                 </div>
-                <div class="form-group">
-                {{ form.text(class="form-control") }}
-                {{ form.search(class="btn btn-primary") }}
+                <div class="row">
+                    <div class="col">
+                    {{ form.text(class="form-control") }}
+                    </div>
+                    <div class="col">
+                    {{ form.search(class="btn btn-primary search") }}
+                    </div>
                 </div>
                 <p>
                     {% for error in form.text.errors %}

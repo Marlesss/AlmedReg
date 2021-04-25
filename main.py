@@ -9,15 +9,23 @@ from Forms.register_form import RegisterForm
 from Forms.login_form import LoginForm
 from Forms.search_form import SearchForm
 from Forms.note_form import NoteForm
+from Forms.cancel_form import CancelForm
 from Forms.change_password_form import ChangePasswordForm
 from data import db_session
 from data.users import User
-from for_tests import TALONS, PATIENT, DOCTOR, INTERVALS
-from Archimed import get_response, TODAY, NEXT_WEEK, NEXT_MONTH
+from Archimed import get_response, TODAY, NEXT_WEEK, put_response
 
 WEEK = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 MONTHS = ["Янв.", "Фев.", "Марта", "Апр.", "Мая",
           "Июня", "Июля", "Авг.", "Сент.", "Окт.", "Нояб.", "Дек."]
+SPECIALIZATIONS = ['Терапевт', 'Массажист', 'Стоматолог', 'Педиатр',
+                   'Маммолог', 'Оториноларинголог', 'Уролог', 'Невролог',
+                   'Врач', 'УЗИ', 'Гинеколог', 'Кардиолог', 'Эндокринолог',
+                   'Холтер', 'Дерматовенеролог', 'Офтальмолог', 'Аллерголог',
+                   'Онколог', 'Хирург', 'Ортопед', 'Инфекционист', 'Фтизиатр',
+                   'Психиатр', 'Нарколог', 'Рентгенолог', 'Профпатолог',
+                   'Психотерапевт', 'Психолог', 'Логопед', 'Гастроэнтеролог',
+                   'Травматолог', 'Нейрохирург']
 
 app = Flask(__name__)
 app.config['PERMANENT_SESSION_LIFETIME'] = dt.timedelta(minutes=180)
@@ -115,11 +123,19 @@ def get_appointment():
     try:
         if session.get("step", 0) == 0:
             session["step"] = 0
-            spec = get_response("specializations")
-            session["steps"] = [spec["data"]]
-            return render_template("appointment_step_1.html", specializations=spec["data"], step=session["step"])
+            spec = get_response("specializations")["data"]
+            form = NoteForm()
+            if form.validate_on_submit():
+                spec_name = form.text.data
+                spec = sorted(list(filter(lambda sp: spec_name.lower() in sp["name"].lower(), spec)),
+                              key=lambda sp: sp["name"])
+            else:
+                spec = sorted(list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec)), key=lambda sp: sp["name"])
+            session["steps"] = [list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec))]
+            return render_template("appointment_step_1.html", specializations=spec, step=session["step"], form=form)
         elif session["step"] == 1:
-            intervals = get_response("intervals", params=[f"date_from={TODAY}", f"date_to={NEXT_MONTH}"])["doctors"]
+            intervals = get_response("intervals", params=[f"date_from={session['interval'][0]}",
+                                                          f"date_to={session['interval'][1]}"])["doctors"]
             doctors = list(filter(lambda doc: doc["primary_spec"] == session["steps"][0]["name"], intervals))
             day_today, month_today, year_today = map(int, session["interval"][0].split("."))
             day_week, month_week, year_week = map(int, session["interval"][1].split("."))
@@ -133,7 +149,7 @@ def get_appointment():
                 week.append([WEEK[day.weekday()], str(day.day) + " " + MONTHS[day.month - 1]])
             for doc in doctors:
                 current_schedules = []
-                last_date = date_today
+                last_date = dt.date(int(year_today), int(month_today), int(day_today)) - dt.timedelta(days=1)
                 for i in range(len(doc["schedules"])):
                     day, month, year = map(int, doc["schedules"][i]["date"].split("."))
                     date = dt.date(year=year, day=day, month=month)
@@ -142,7 +158,7 @@ def get_appointment():
                             if date.day - last_date.day > 1:
                                 current_schedules = (current_schedules +
                                                      [[] for k in
-                                                      range(int(str(date - last_date).split()[0]))]
+                                                      range(date.day - last_date.day - 1)]
                                                      + [doc["schedules"][i]])
                             else:
                                 current_schedules = (current_schedules + [doc["schedules"][i]])
@@ -169,8 +185,14 @@ def get_appointment():
         elif session["step"] == 2:
             intervals = session["steps"][1]["schedules"]
             session["steps"] = session["steps"][:2] + [intervals]
-            print(intervals)
-            return render_template("appointment_step_3.html", intervals=intervals, step=session["step"])
+            time_is = str(dt.datetime.now()).split()[1].split(":")[:2]
+            time_is = int(time_is[0]) * 60 + int(time_is[1])
+            if session["steps"][1]["schedules"]["date"] == TODAY:
+                today = True
+            else:
+                today = False
+            return render_template("appointment_step_3.html", intervals=intervals, step=session["step"], time=time_is,
+                                   int=int, today=today)
         else:
             return render_template("appointment_finish.html", appointment=session["steps"], step=session["step"])
     except Exception as e:
@@ -196,7 +218,6 @@ def change_interval(change_type):
         session["interval"] = [left_date, right_date]
     else:
         session["interval"] = [TODAY, NEXT_WEEK]
-    print(session["interval"])
     return redirect("/appointment")
 
 
@@ -216,11 +237,11 @@ def change_step(step, ind):
         step = int(step)
     else:
         if len(session["steps"]) == 3:
-            session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
+            if "intervals" in session["steps"][session["step"]]:
+                session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][ind]
             appointment = session["steps"]
             return render_template("appointment_finish.html", appointment=appointment)
         return redirect("/appointment")
-    print(session["step"], session["steps"], ind, sep="\n")
     if ind >= 0:
         session["steps"][session["step"]] = session["steps"][session["step"]][ind]
     session["step"] = step
@@ -233,9 +254,21 @@ def check_note(note_id):
     if note and note["patient_id"] == current_user.med_card_id:
         patient = get_response("medcards", id=str(note["patient_id"]))
         doctor = get_response("doctors", id=str(note["docs"][0]["id"]))
+        session["doctor"] = doctor
+        session["note"] = note
         return render_template("check_note.html", note=note, patient=patient, doc=doctor)
     print("Не нашлось талона")
     return redirect("/")
+
+
+@app.route("/cancel_note", methods=["GET", "POST"])
+def cancel_note():
+    form = CancelForm()
+    if form.validate_on_submit():
+        reason = form.reasons.data
+        put_response("talons", {"status_id": 4}, id=str(session["note"]["id"]))
+        return redirect("/self_page")
+    return render_template("cancel_note.html", note=session["note"], doc=session["doctor"], form=form)
 
 
 @app.route("/post_appointment")
@@ -291,7 +324,7 @@ def self_page():
                   "fields[]=type", "fields[]=scientific_degree"]
         doctor = get_response("doctors", str(current_user.med_card_id), params)
         notes = get_response(f"/doctors/{current_user.med_card_id}/talons", params=["filters[0][field]=status_id",
-                                                                                    "filters[0][value]=1", ])["data"]
+                                                                                    "filters[0][value]=1"])["data"]
         form = NoteForm()
         if form.validate_on_submit():
             text = form.text.data

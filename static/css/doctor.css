@@ -7,8 +7,17 @@
 
 .doc_name{
     display: table-cell;
-    text-align: left;
+    text-align: center;
     width: 50%;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.time{
+    font-size: 20px;
+    vertical-align: middle;
+    min-width: 100px;
+    min-height: 50px;
 }
 
 .header{
@@ -48,6 +57,7 @@
     max-width: 100px;
     vertical-align: middle;
     text-align: center;
+    font-size: 15px;
 }
 
 .doctor{

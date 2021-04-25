@@ -141,3 +141,8 @@ svg {
       line-height: 1.25rem;
    }
 }
+
+
+.search{
+    vertical-align: 0;
+}

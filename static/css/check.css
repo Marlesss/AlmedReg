@@ -141,3 +141,10 @@ svg {
     text-align: center;
     width: 50%;
 }
+
+.cancel_cell{
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    width: 50%;
+}

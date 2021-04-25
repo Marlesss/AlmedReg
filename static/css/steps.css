@@ -23,6 +23,19 @@ a {
   text-decoration: none;
 }
 
+a.col{
+    font-size: 100%;
+}
+
+.search{
+    font-size: 19px;
+    vertical-align: 0;
+}
+
+.form-control{
+    font-size: 20px;
+}
+
 section {
   /* used just to separate different styles */
   border-bottom: 1px solid #e6e6e6;
@@ -30,7 +43,7 @@ section {
 section h2 {
   width: 90%;
   margin: 0 auto 2em;
-  color: #2c3f4c;
+  color: #398048;
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
@@ -79,6 +92,7 @@ Basic Style
 .cd-breadcrumb li.current > *, .cd-multi-steps li.current > * {
   /* selected step */
   color: #558f21;
+  background-color: #398048;
 }
 .no-touch .cd-breadcrumb a:hover, .no-touch .cd-multi-steps a:hover {
   /* steps already visited */
@@ -206,7 +220,7 @@ Multi steps indicator
   }
   .cd-multi-steps.text-center li.current > *, .cd-multi-steps.text-center li.visited > * {
     color: #ffffff;
-    background-color: #558f21;
+    background-color: #398048;
   }
   .cd-multi-steps.text-center.custom-icons li.visited a::before {
     /* change the custom icon for the visited item - check icon */
@@ -323,4 +337,9 @@ Add a counter to the multi-steps indicator
   .cd-multi-steps.text-bottom.count li > * {
     padding-top: 34px;
   }
+}
+
+.spec_btn:hover{
+    color: grey;
+    text-decoration: underline;
 }
