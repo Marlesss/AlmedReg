@@ -84,7 +84,11 @@ def main():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if not current_user.is_authenticated:
+        return redirect("/login")
+    if current_user.type_of_user <= User.ADMIN:
+        return redirect("/admin")
+    return redirect("/self_page")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -118,11 +122,12 @@ def register():
             "phone": phone
         }
         # report = create_med_card(data)
+        print("Имитатсия создания мед. карты :)")
         report = {
             "status": "Ok",
             "id": 1234
         }
-        print(report)
+        print(data)
         # /Создаём мед. карту
         if report['status'] != "Ok":
             return render_template("register.html", title="Регистрация", form=form,
@@ -140,7 +145,14 @@ def register():
 
 @app.route("/appointment", methods=["GET", "POST"])
 def get_appointment():
+    if not current_user.is_authenticated or current_user.type_of_user != User.PATIENT:
+        return redirect("/")
     try:
+        if "message" in session:
+            message = session["message"]
+            del session["message"]
+        else:
+            message = ""
         if session.get("step", 0) == 0:
             session["step"] = 0
             spec = get_response("specializations")["data"]
@@ -155,7 +167,8 @@ def get_appointment():
                               key=lambda sp: sp["name"])
             session["steps"] = [list(filter(lambda sp: sp["name"] in SPECIALIZATIONS, spec))]
             return render_template("appointment_step_1.html", title="Запись на приём",
-                                   specializations=spec, step=session["step"], form=form)
+                                   specializations=spec, step=session["step"], form=form,
+                                   message=message)
         elif session["step"] == 1:
             intervals = get_response("intervals", params=[f"date_from={session['interval'][0]}",
                                                           f"date_to={session['interval'][1]}"])[
@@ -296,7 +309,6 @@ def check_note(note_id):
         session["note"] = note
         return render_template("check_note.html", title="Просмотр записи", note=note,
                                patient=patient, doc=doctor)
-    print("Не нашлось талона")
     return redirect("/")
 
 
@@ -314,24 +326,31 @@ def cancel_note():
 
 @app.route("/post_appointment")
 def post_appointment():
-    pprint(session["steps"])
+    # pprint(session["steps"])
     post_data = {
         "doc_id": session["steps"][1]["id"],
         "begintime": session["steps"][2]["start"],
         "date": session["steps"][1]["schedules"]["date"],
         "patient_id": current_user.med_card_id
     }
+    print("Имитатсия создания талона :)")
     print(post_data)
-    # Тута пост запрос. Не делаю, чтобы бд не ломать
-    return redirect("/clear_session")
+    # report = post_response("talons", data=post_data)
+    report = {
+        "status": "Ne ok"
+    }
+    if report["status"] != "Ok":
+        clear_session()
+        session["message"] = "Ошибка записи"
+        return redirect('/appointment')
+    clear_session()
+    return redirect('/self_page')
 
 
-@app.route("/clear_session")
 def clear_session():
     session["step"] = 0
     session["steps"] = []
     session['interval'] = []
-    return redirect(f"/self_page")
 
 
 @app.route("/self_page", methods=["GET", "POST"])
@@ -341,7 +360,7 @@ def self_page():
     if current_user.type_of_user == 5:
         params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name",
                   "fields[]=middle_name",
-                  "fields[]=birthdate", "fields[]=email"]
+                  "fields[]=birthdate", "fields[]=phone"]
         patient = get_response("medcards", str(current_user.med_card_id), params)
         notes = get_response(f"medcards/{patient['id']}/talons")["data"]
         form = NoteForm()

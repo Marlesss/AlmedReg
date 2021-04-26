@@ -4,34 +4,37 @@
 <link rel="stylesheet" href="/static/css/steps.css">
 <script src="/static/js/modernizr.js"></script>
 <section>
-	<h2>Запись на приём</h2>
-	<nav>
-		<ol class="cd-multi-steps text-center">
-			{% if step > 0%}
-				<li class="visited"><a href="/change_step/0/-1">Специализация</a></li>
-			{% elif step == 0 %}
-				<li class="current"><a href="#">Специализация</a></li>
-			{% else %}
-				<li><em>Специализация</em></li>
-			{% endif %}
-			{% if step > 1%}
-				<li class="visited"><a href="/change_step/1/-1">Врач</a></li>
-			{% elif step == 1 %}
-				<li class="current"><a href="#">Врач</a></li>
-			{% else %}
-				<li><em>Врач</em></li>
-			{% endif %}
-			{% if step == 2 %}
-				<li class="current"><a href="#">Время</a></li>
-			{% else %}
-				<li><em>Время</em></li>
-			{% endif %}
-		</ol>
-	</nav>
+    <h2>Запись на приём</h2>
+    <nav>
+        <ol class="cd-multi-steps text-center">
+            {% if step > 0%}
+            <li class="visited"><a href="/change_step/0/-1">Специализация</a></li>
+            {% elif step == 0 %}
+            <li class="current"><a href="#">Специализация</a></li>
+            {% else %}
+            <li><em>Специализация</em></li>
+            {% endif %}
+            {% if step > 1%}
+            <li class="visited"><a href="/change_step/1/-1">Врач</a></li>
+            {% elif step == 1 %}
+            <li class="current"><a href="#">Врач</a></li>
+            {% else %}
+            <li><em>Врач</em></li>
+            {% endif %}
+            {% if step == 2 %}
+            <li class="current"><a href="#">Время</a></li>
+            {% else %}
+            <li><em>Время</em></li>
+            {% endif %}
+        </ol>
+    </nav>
+    {% if message %}
+    <p class="alert alert-danger" role="alert">{{ message }}</p>
+    {% endif %}
 </section>
 <section>
-	<div class="small">
-	{% block step_content %} {% endblock %}
-	</div>
+    <div class="small">
+        {% block step_content %} {% endblock %}
+    </div>
 </section>
 {% endblock %}

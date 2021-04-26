@@ -27,8 +27,8 @@
                <div class="card-about">
                  <div class="item">
                      {% if type == 5 %}
-                        <span class="value">Email:</span>
-                        <span class="label">{{ patient["email"] }}</span>
+                        <span class="value">Телефон:</span>
+                        <span class="label">{{ patient["phone"] }}</span>
                      {% else %}
                         <span class="value">Специализация:</span>
                         <span class="label">{{ doctor["type"] }}</span>
@@ -38,7 +38,7 @@
                <div class="card-about">
                  <div class="item">
                      {% if type == 5 %}
-                        <span class="value">Birthday:</span>
+                        <span class="value">День рождения:</span>
                         <span class="label">{{ patient["birthdate"] }}</span>
                      {% else %}
                         <span class="value">Учёная степень:</span>
