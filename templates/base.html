@@ -36,22 +36,32 @@
                             <div class="empty_col"></div>
                             <a class="btn btn-danger col" href="/logout">Выйти</a>
                         </div>
-                        {% else %}
-                        <div class="row">
-                            <a class="btn btn-light col" href="/self_page">Личный&nbsp;кабинет</a>
-                            <div class="empty_col"></div>
-                            <a class="btn btn-danger col" href="/logout">Выйти</a>
-                        </div>
-                        {% endif %}
                         <div class="row">
                             <a class="btn btn-light col" href="/change_password"
                                style="width:100%;">Изменить пароль</a>
                         </div>
                         {% else %}
-                        <div>
+                        <div class="row">
+                            <a class="btn btn-light col" href="/self_page">Личный&nbsp;кабинет</a>
+                            <a class="btn btn-danger col" href="/logout">Выйти</a>
+                        </div>
+                        <div class="row">
+                            {% if current_user.type_of_user == current_user.PATIENT %}
+                            <a class="btn btn-success col" href="/appointment"
+                               style="width:100%;">Записаться на приём</a>
+                            {% endif %}
+                            <a class="btn btn-light col" href="/change_password"
+                               style="width:100%;">Изменить пароль</a>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="row">
                             <a class="btn btn-success col" href="/login">Войти</a>
-                            <div class="empty_col"></div>
                             <a class="btn btn-light col" href="/register">Зарегистрироваться</a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-success col" href="/appointment"
+                               style="width:100%;">Записаться на приём</a>
                         </div>
                         {% endif %}
                     </div>

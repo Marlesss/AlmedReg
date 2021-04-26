@@ -145,7 +145,7 @@ def register():
 
 @app.route("/appointment", methods=["GET", "POST"])
 def get_appointment():
-    if not current_user.is_authenticated or current_user.type_of_user != User.PATIENT:
+    if current_user.is_authenticated and current_user.type_of_user != User.PATIENT:
         return redirect("/")
     try:
         if "message" in session:
@@ -285,6 +285,8 @@ def change_step(step, ind):
     if step != "finish":
         step = int(step)
     else:
+        if not current_user.is_authenticated:
+            return redirect("/login")
         if len(session["steps"]) == 3:
             if "intervals" in session["steps"][session["step"]]:
                 session["steps"][session["step"]] = session["steps"][session["step"]]["intervals"][
@@ -293,7 +295,7 @@ def change_step(step, ind):
             return render_template("appointment_finish.html", title="Запись на приём",
                                    appointment=appointment)
         return redirect("/appointment")
-    if ind >= 0:
+    if ind >= 0 and session["steps"][session["step"]].__class__.__name__ == "list":
         session["steps"][session["step"]] = session["steps"][session["step"]][ind]
     session["step"] = step
     return redirect("/appointment")
@@ -337,7 +339,7 @@ def post_appointment():
     print(post_data)
     # report = post_response("talons", data=post_data)
     report = {
-        "status": "Ne ok"
+        "status": "Ok"
     }
     if report["status"] != "Ok":
         clear_session()
@@ -355,7 +357,7 @@ def clear_session():
 
 @app.route("/self_page", methods=["GET", "POST"])
 def self_page():
-    if not current_user.is_authenticated:
+    if not current_user.is_authenticated or current_user.type_of_user <= User.ADMIN:
         return redirect("/")
     if current_user.type_of_user == 5:
         params = ["fields[]=id", "fields[]=last_name", "fields[]=first_name",
