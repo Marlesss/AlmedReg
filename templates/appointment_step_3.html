@@ -6,12 +6,20 @@
             {% if interval["free"] %}
                 {% if today %}
                     {% if time <= int(doc["schedules"][i]["start"].split(":")[0]) * 60 + int(doc["schedules"][i]["start"].split(":")[1]) %}
-                        <a href="/change_step/finish/{{ loop.index - 1 }}" class="btn btn-success" style="font-size: 20px; vertical-align: middle;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                        {% if current_user.is_authenticated %}
+                            <a href="/change_step/finish/{{ loop.index - 1 }}" class="btn btn-success" style="font-size: 20px; vertical-align: middle;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                        {% else %}
+                            <a class="btn btn-success" style="font-size: 20px; vertical-align: middle;  min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                        {% endif %}
                     {% else %}
                         <a class="btn btn-secondary" style="font-size: 20px; vertical-align: middle; min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
                     {% endif %}
                 {% else %}
-                    <a href="/change_step/finish/{{ loop.index - 1 }}" class="btn btn-success" style="font-size: 20px; vertical-align: middle;  min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="/change_step/finish/{{ loop.index - 1 }}" class="btn btn-success" style="font-size: 20px; vertical-align: middle;  min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                    {% else %}
+                        <a class="btn btn-success" style="font-size: 20px; vertical-align: middle;  min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>
+                    {% endif %}
                 {% endif %}
             {% else %}
                 <a class="btn btn-secondary" style="font-size: 20px; vertical-align: middle; min-width: 100px; min-height: 50px;">{{ interval["start"] }} - {{ interval["end"] }}</a>

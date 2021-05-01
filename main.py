@@ -176,10 +176,10 @@ def get_appointment():
                     date = dt.date(year=year, day=day, month=month)
                     if date >= date_today:
                         if date_week >= date:
-                            if date.day - last_date.day > 1:
+                            if (date - last_date).days > 1:
                                 current_schedules = (current_schedules +
                                                      [[] for k in
-                                                      range(date.day - last_date.day - 1)]
+                                                      range((date - last_date).days - 1)]
                                                      + [doc["schedules"][i]])
                             else:
                                 current_schedules = (current_schedules + [doc["schedules"][i]])
