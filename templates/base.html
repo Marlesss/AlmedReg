@@ -6,26 +6,76 @@
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
           integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
           crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <script src="/static/js/jquery.js" type="text/javascript"></script>
+    <script src="/static/js/jquery.maskedinput.js" type="text/javascript"></script>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
     <title>{{ title }}</title>
 </head>
 <body>
-<header>
-    <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">Наше приложение</a>
-        {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/logout">{{ current_user.email }}</a>
-        {% else %}
-        <p>
-            <a class="btn btn-primary" href="/register">Зарегистрироваться</a>
-            <a class="btn btn-success" href="/login">Войти</a>
-        </p>
-        {% endif %}
-    </nav>
-</header>
-
-<!-- Begin page content -->
-<main role="main" class="container">
-    {% block content %} {% endblock %}
-</main>
+<div class="wrapper">
+    <div class="shadow">
+        <div class="container">
+            <div class="site_title">
+                <div class="row">
+                    <div class="logo_container">
+                        <a href="/"><img src="/static/images/almed.png" alt="" width="320px"></a>
+                    </div>
+                    <div class="school_name_cont">
+                        <p class="school_description">Общество с ограниченной ответственностью
+                            «Эльче»</p>
+                        <p class="school_name">Медицинский центр Алмед </p>
+                    </div>
+                    <div class="control_col">
+                        {% if current_user.is_authenticated %}
+                        {% if current_user.type_of_user <= current_user.ADMIN %}
+                        <div class="row">
+                            <a class="btn btn-light col" href="/admin">
+                                Панель&nbsp;администратора
+                            </a>
+                            <div class="empty_col"></div>
+                            <a class="btn btn-danger col" href="/logout">Выйти</a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-light col" href="/change_password"
+                               style="width:100%;">Изменить пароль</a>
+                        </div>
+                        {% else %}
+                        <div class="row">
+                            <a class="btn btn-light col" href="/self_page">Личный&nbsp;кабинет</a>
+                            <a class="btn btn-danger col" href="/logout">Выйти</a>
+                        </div>
+                        <div class="row">
+                            {% if current_user.type_of_user == current_user.PATIENT %}
+                            <a class="btn btn-success col" href="/appointment"
+                               style="width:100%;">Записаться на приём</a>
+                            {% endif %}
+                            <a class="btn btn-light col" href="/change_password"
+                               style="width:100%;">Изменить пароль</a>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="row">
+                            <a class="btn btn-success col" href="/login">Войти</a>
+                            <a class="btn btn-light col" href="/register">Зарегистрироваться</a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-success col" href="/appointment"
+                               style="width:100%;">Посмотреть расписание врачей</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <main role="main" class="site_body container clear_fix">
+            {% block content %} {% endblock %}
+        </main>
+        <div class="footer_copyright">601501, Владимирская область г. Гусь - Хрустальный, ул.
+            Прядильная, д. 9<br> Телефоны платных услуг: 8(800)100-73-87 | +7(919)016-87-88 |
+            +7(49241)3-24-47 | 2-78-30
+        </div>
+    </div>
+</div>
 </body>
 </html>

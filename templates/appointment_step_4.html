@@ -1,0 +1,7 @@
+{% extends "appointment.html" %}
+
+{% block step_content %}
+    {% for interval in intervals %}
+        <a href="/appointment/finish/{{ chosen_building }}/{{ chosen_specialization }}/{{ chosen_doc }}/{{ loop.index - 1 }}">{{ interval }}</a><br>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,124 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    position: relative;
+    z-index: 10;
+}
+
+.shadow {
+    margin: 0 auto;
+    max-width: 1280px;
+    max-height: 5000px;
+    box-shadow: -23px 0px 23px -9px rgb(234 234 234 / 75%),
+                 23px 0px 23px -9px rgb(234 234 234 / 75%);
+    box-sizing: border-box;
+    padding: 0px 20px;
+}
+
+.container {
+    max-width: 1280px;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-width: 1000px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    background-color: white;
+}
+
+.site_body {
+    padding-bottom: 24px;
+    padding-top: 20px;
+}
+
+.clear_fix {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+.site_title {
+    display: table;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 8px;
+}
+
+.table-info {
+display: table;
+border-bottom-color: transparent;
+}
+
+.table-scroll {
+    overflow:auto;
+    height: 300px;
+    width: 100%;
+}
+
+.row {
+    display: table-row;
+    border-spacing: 5px;
+}
+
+.row-info {
+    width: 100%;
+    line-height: 1.7;
+    height: 40px;
+}
+
+.row-auto {
+    width: auto;
+}
+
+.logo_container {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    width: 120px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.school_name_cont {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.empty_col {
+    display: table-cell;
+    min-width: 30px;
+}
+
+.col {
+    display: table-cell;
+}
+
+.col-info {
+    vertical-align: middle;
+}
+
+.col-auto {
+    width: auto;
+}
+
+
+.control_col {
+    display: table-cell;
+    max-width: 300px;
+    min-width: 300px;
+}
+
+.footer_copyright {
+    border-top: 1px solid #e6e6e6;
+    padding-top: 25px;
+    position: relative;
+    font-size: 16px;
+    padding-left: 10px;
+    padding-bottom: 20px;
+    min-width: 1000px;
+    text-align: center;
+}

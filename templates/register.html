@@ -1,39 +1,87 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script type="text/javascript">
+jQuery(function($){
+   $("#phone").mask("+7(999)999-99-99",{autoclear: false});
+});
+
+
+
+</script>
 <h3>Регистрация</h3>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
-        {{ form.email.label }} <br>
-        {{ form.email(class="form-control", type="email") }} <br>
-        {% for error in form.email.errors %}
-        <p class="alert alert-danger" role="alert">
-            {{ error }}
-        </p>
-        {% endfor %}
+        {{ form.surname.label }} <br>
+        {{ form.surname(class="form-control", type="name") }} <br>
+        {% for error in form.surname.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.first_name.label }} <br>
+        {{ form.first_name(class="form-control", type="name") }} <br>
+        {% for error in form.first_name.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.middle_name.label }} <br>
+        {{ form.middle_name(class="form-control", type="name") }} <br>
+        {% for error in form.middle_name.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+
+        {{ form.birthdate.label }} <br>
+        {{ form.birthdate(class="form-control", type="date", id="birthdate") }} <br>
+        {% for error in form.birthdate.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
+    </p>
+    <p>
+
+        {{ form.phone.label }} <br>
+        {{ form.phone(class="form-control", type="phone", id="phone") }} <br>
+        {% for error in form.phone.errors %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
     </p>
     <p>
         {{ form.password.label }} <br>
         {{ form.password(class="form-control", type="password") }} <br>
         {% for error in form.password.errors %}
-        <p class="alert alert-danger" role="alert">
-            {{ error }}
-        </p>
-        {% endfor %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
     </p>
     <p>
         {{ form.password_again.label }} <br>
         {{ form.password_again(class="form-control", type="password") }} <br>
         {% for error in form.password_again.errors %}
-        <p class="alert alert-danger" role="alert">
-            {{ error }}
-        </p>
-        {% endfor %}
+    <p class="alert alert-danger" role="alert">
+        {{ error }}
+    </p>
+    {% endfor %}
     </p>
     <p>
         {{ form.submit(type="submit", class="btn btn-primary") }}
     </p>
-    {{ message }}
+    <p>
+        {{ message }}
+    </p>
 </form>
 {% endblock %}

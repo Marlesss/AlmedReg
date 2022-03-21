@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 align="center">{{ note["docs"][0]["type"] }}</h1>
+<link href="../static/css/check.css" rel="stylesheet">
+<div class="datetime"><p class="notetime">Дата приёма: {{ note["date"] }}<br>Время приёма: {{
+    ":".join(note["begintime"].split(":")[:2]) }}</p></div>
+<div class="check">
+    <div class="row">
+        <div class="cancel_cell">
+            <div class="card" style="max-width: 500px;">
+                <div class="card-avatar">
+                    <img src="../static/img/doc.png">
+                </div>
+                <div class="card-details">
+                    <div class="name">{{ doc["last_name"] }} {{ doc["first_name"] }} {{ doc["middle_name"] }}</div>
+                    <div class="occupation">Доктор</div>
+                    <div class="card-about">
+                        <div class="item">
+                            <span class="value">Специализация:</span>
+                            <span class="label">{{ doc["type"] }}</span>
+                        </div>
+                    </div>
+                    <div class="card-about">
+                        <div class="item">
+                            <span class="value">Ученая степень:</span>
+                            <span class="label">{{ doc["scientific_degree"] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cancel_cell">
+            <form action="" method="POST">
+                {{ form.hidden_tag() }}
+                <p>
+                    {% for reason in form.reasons %}
+                    {{reason}}
+                    {{ reason.label }} <br>
+                    {% endfor %}
+                </p>
+                <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+                    {% for error in form.reasons.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% if error == "Not a valid choice" %}
+                                 Выберите причину отмены
+                            {%endif%}
+                        </div>
+                    {% endfor %}
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
